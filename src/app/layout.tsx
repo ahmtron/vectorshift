@@ -19,6 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://vectorshift-mu.vercel.app'),
   title: {
     default: 'VectorShift — Climate-Driven Disease Risk Intelligence',
     template: '%s | VectorShift',
