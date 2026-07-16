@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Cabinet Grotesk';
+  src: url('/fonts/CabinetGrotesk-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@theme {
+  --color-background-primary: #080c14;
+  --color-background-secondary: #0d1220;
+  --color-background-tertiary: #131828;
+  --color-background-hover: #1a2035;
+
+  --color-border-subtle: #1e2640;
+  --color-border-default: #2a3358;
+  --color-border-strong: #3d4f7c;
+
+  --color-text-primary: #f0f4ff;
+  --color-text-secondary: #8b9cc0;
+  --color-text-tertiary: #556080;
+  --color-text-disabled: #3a4560;
+
+  --color-accent-50: #fff8e7;
+  --color-accent-100: #feefc3;
+  --color-accent-200: #fcd97a;
+  --color-accent-300: #f9be42;
+  --color-accent-400: #f5a623;
+  --color-accent-500: #e08b0a;
+  --color-accent-600: #b86d06;
+
+  --color-risk-none: #1a1f2e;
+  --color-risk-low: #1e3a2f;
+  --color-risk-moderate: #4a3b1a;
+  --color-risk-high: #6b2d10;
+  --color-risk-critical: #7a1515;
+  --color-risk-new: #2a4a6b;
+
+  --color-success: #1e6b4a;
+  --color-warning: #7a5a0a;
+  --color-danger: #7a1515;
+  --color-info: #1a3a6b;
+
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-display: 'Cabinet Grotesk', Inter, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+}
+
+::selection {
+  background-color: rgba(245, 166, 35, 0.3);
+  color: var(--color-text-primary);
+}
+
+.darkreader-ignore,
+.darkreader-ignore * {
+  filter: none !important;
+  color: inherit !important;
+  background-color: transparent !important;
+  border-color: inherit !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+.darkreader-ignore svg,
+.darkreader-ignore svg * {
+  fill: inherit !important;
+  stroke: inherit !important;
+  stop-color: inherit !important;
+  color: inherit !important;
+}
+
+html[data-darkreader-mode] .darkreader-ignore,
+html[data-darkreader-mode] .darkreader-ignore * {
+  filter: none !important;
+}
+
+html[data-darkreader-mode] .darkreader-ignore svg,
+html[data-darkreader-mode] .darkreader-ignore svg * {
+  fill: inherit !important;
+  stroke: inherit !important;
+  stop-color: inherit !important;
+  color: inherit !important;
+}
+
+[data-darkreader-inline-stroke] {
+  stroke: currentColor !important;
+}
+[data-darkreader-inline-fill] {
+  fill: currentColor !important;
+}
+[data-darkreader-inline-stopcolor] {
+  stop-color: currentColor !important;
+}
+[data-darkreader-inline-bgcolor] {
+  background-color: currentColor !important;
+}
+[data-darkreader-inline-color] {
+  color: currentColor !important;
+}
+[data-darkreader-mode] {
+  filter: none !important;
+}

@@ -1,0 +1,2189 @@
+PART ONE: PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Section 1: Product Foundation
+1.1 Product Vision
+VectorShift is a global climate-health intelligence platform that visualizes how rising temperatures and shifting precipitation patterns are expanding the geographic range of disease-carrying vectors — mosquitoes, ticks, and sandflies — into regions where they have never existed before.
+
+The platform transforms raw NASA climate data, WHO disease surveillance records, and published vector biology research into an interactive, visual, decision-support tool that health officials, researchers, journalists, and policymakers can use without any technical background.
+
+Vision Statement:
+
+VectorShift makes the invisible visible — showing governments, researchers, and citizens where the next epidemic risk is quietly building, before the first person gets sick.
+
+Mission Statement:
+
+To democratize access to climate-health intelligence by combining freely available scientific data into a single, beautiful, actionable platform that helps the world prepare for tomorrow's disease threats today.
+
+1.2 Product Goals
+Goal	Description	Success Metric
+Awareness	Make climate-driven disease risk understandable to non-scientists	Time on site > 4 minutes average
+Utility	Provide genuine research value to public health professionals	Downloads of data/reports per month
+Credibility	Establish VectorShift as a trusted, science-backed resource	Citation in academic or news contexts
+Reach	Serve users across multiple countries and disciplines	Users from 30+ countries within 6 months
+Impact	Influence preparedness decisions at organizational level	Documented use by NGO or government body
+1.3 Product Principles
+These principles guide every design and product decision:
+
+Principle 1 — Clarity over complexity
+Every feature must be understandable to a health official who is not a data scientist. If something requires a manual to understand, it is too complex.
+
+Principle 2 — Data honesty
+Always communicate what the data can and cannot tell you. Show confidence intervals. Label projections as projections. Never overstate certainty.
+
+Principle 3 — Speed of insight
+A user should be able to find a meaningful insight within 60 seconds of arriving on the platform. No onboarding required for core features.
+
+Principle 4 — Visual storytelling
+The platform should feel like an editorial data experience, not a government database. Every chart, map, and number should tell part of a story.
+
+Principle 5 — Earned trust
+Every data point links to its source. Every methodology is explained. Users can verify everything.
+
+1.4 Target Audience Overview
+VectorShift serves five distinct user groups with different needs, different technical backgrounds, and different reasons to visit.
+
+Section 2: User Personas
+Persona 1 — The Public Health Official
+Name: Dr. Amira Hassan
+Location: Cairo, Egypt
+Role: Epidemiologist at the Egyptian Ministry of Health
+Age: 38
+Technical Level: Moderate — comfortable with Excel, basic GIS, reads WHO reports
+
+Context:
+Amira tracks disease trends in Egypt and neighboring countries. She has seen dengue cases emerging in coastal regions and needs to make a case to her ministry for increased vector control funding before a major outbreak occurs.
+
+Goals:
+
+Understand whether Egypt's climate is becoming more suitable for dengue mosquitoes
+Compare Egypt's risk trajectory with neighboring countries
+Generate a report or evidence package she can present to decision-makers
+Understand which regions within her country are most at risk
+Frustrations:
+
+WHO data is in PDFs and spreadsheets that are hard to compare
+No single tool shows climate data alongside disease data
+Existing tools require GIS expertise she doesn't have
+Reports take weeks to compile manually
+How VectorShift Helps:
+She opens the platform, selects dengue, selects Egypt, and sees a clear risk timeline from 1990 to 2050. She sees the coastal governorates highlighted as highest risk. She exports a one-page summary. She presents it the next day.
+
+Quoted Need:
+
+"I need to show my minister a clear picture of the risk before it becomes a crisis, not after."
+
+Persona 2 — The Climate/Health Researcher
+Name: James Okonkwo
+Location: Nairobi, Kenya / London, UK (PhD student)
+Role: Doctoral researcher studying climate change and infectious disease
+Age: 27
+Technical Level: High — uses R, Python, reads primary literature
+
+Context:
+James is writing his thesis on how climate change is affecting malaria distribution in sub-Saharan Africa. He needs data across multiple countries and decades. Currently he spends weeks collecting and cleaning data from different sources.
+
+Goals:
+
+Access cleaned, standardized climate and disease data for African countries
+Explore correlations between temperature changes and disease incidence
+Download data in usable formats for his own analysis
+Find visual references for his thesis presentations
+Frustrations:
+
+Data is scattered across NASA, WHO, and country-level portals in incompatible formats
+Most platforms are either too simple (no raw data) or too complex (GIS software)
+Difficult to compare countries because data uses different time periods and units
+How VectorShift Helps:
+James uses the Data Explorer to filter malaria data across 20 African countries, downloads it as CSV, and uses it in his R analysis. He also screenshots the trend visualizations for his thesis presentation.
+
+Quoted Need:
+
+"I spend more time finding and cleaning data than actually doing research."
+
+Persona 3 — The Journalist
+Name: Sofia Bergmann
+Location: Berlin, Germany
+Role: Science and environment journalist at a European news outlet
+Age: 32
+Technical Level: Low-moderate — comfortable with web tools, not with data science
+
+Context:
+Sofia is writing a feature about how climate change is bringing tropical diseases to Europe. She needs compelling visuals, credible data sources, and the ability to understand the story quickly without becoming a scientist.
+
+Goals:
+
+Find clear, visually compelling evidence of disease risk expansion in Europe
+Understand which European countries are most affected
+Get citable data sources she can reference in her article
+Find a shareable visual or map for her digital article
+Frustrations:
+
+Academic papers are too technical to quote directly
+Raw data portals are not designed for journalists
+Existing maps are static images from 2018 that cannot be updated
+How VectorShift Helps:
+Sofia lands on VectorShift from a search or social share. She immediately sees the animated map showing dengue risk expanding northward across Europe from 1990 to 2024. She reads the country profiles for Italy, Spain, and Greece. She takes a shareable screenshot and cites VectorShift alongside the underlying WHO and NASA sources.
+
+Quoted Need:
+
+"I need something I can show my readers that makes them feel the urgency without needing a science degree."
+
+Persona 4 — The Student or Educator
+Name: Yusra Al-Farsi
+Location: Muscat, Oman
+Role: Final-year public health undergraduate student
+Age: 21
+Technical Level: Basic — comfortable with web apps, limited data experience
+
+Context:
+Yusra is writing her final year dissertation on vector-borne disease risk in the Gulf region. She has limited access to expensive research tools.
+
+Goals:
+
+Understand disease risk patterns in the Middle East
+Find data she can cite in her dissertation
+Use visualizations in her presentation
+Frustrations:
+
+Academic databases cost money
+Raw data is hard to interpret without guidance
+Most tools assume professional expertise
+How VectorShift Helps:
+Yusra browses the Gulf country profiles, reads the methodology explanations, and uses the comparison tool to compare Oman vs UAE vs Saudi Arabia across different diseases. She understands the story without needing to process raw data herself.
+
+Persona 5 — The NGO/Policy Analyst
+Name: Marcus Reyes
+Location: Geneva, Switzerland
+Role: Health policy analyst at an international health NGO
+Age: 44
+Technical Level: Moderate — experienced with policy documents, some data literacy
+
+Context:
+Marcus advises governments on health preparedness investments. He needs to identify which countries are most vulnerable to emerging vector-borne disease threats so his organization can prioritize where to work.
+
+Goals:
+
+Identify countries with high disease risk but weak health systems
+Track multiple diseases and regions at once
+Export intelligence for internal briefings
+Understand trends over time, not just current snapshots
+How VectorShift Helps:
+Marcus uses the Vulnerability Index view which combines suitability risk with health system capacity. He identifies three countries that are simultaneously high-risk and under-resourced. He exports the summary for his team's quarterly briefing.
+
+Section 3: Core Features & Prioritization
+3.1 Feature Priority Framework
+Features are prioritized across three tiers:
+
+Tier	Label	Meaning
+P0	Must Have	Platform cannot launch without this
+P1	Should Have	Core value proposition, build in MVP
+P2	Nice to Have	Post-MVP, adds depth and retention
+P3	Future	Requires AI/ML or significant resources
+3.2 Complete Feature List
+P0 — Core Platform (Cannot launch without)
+Feature ID	Feature	Description
+F-01	Interactive Global Risk Map	World map showing vector habitat suitability by country, colored by risk level
+F-02	Disease Selector	Toggle between 6 diseases: Dengue, Malaria, Zika, Chikungunya, Lyme Disease, Leishmaniasis
+F-03	Time Slider	Drag to see risk levels from 1981 to 2023 (historical)
+F-04	Country Click Profile	Click any country on map to see a panel with key statistics
+F-05	Risk Scoring Engine	Backend calculation of suitability score per country per year per disease
+F-06	Landing Page	Marketing/explanation page for new visitors
+F-07	About / Methodology Page	Full explanation of data sources and calculation methods
+P1 — MVP Features (Build in first version)
+Feature ID	Feature	Description
+F-08	Future Projections	Extend time slider to 2050 using CMIP6 climate scenario data
+F-09	Climate Scenario Toggle	Switch between SSP1 (optimistic), SSP2 (middle), SSP5 (worst case) scenarios
+F-10	Country Detail Page	Full dedicated page per country with all data, charts, and history
+F-11	Comparison Tool	Select two countries and compare them side by side
+F-12	Risk Trend Charts	Line charts showing suitability score over time for selected country/disease
+F-13	Vulnerability Index	Combined score of disease risk + health system weakness
+F-14	Data Explorer	Filterable table of all underlying data, downloadable as CSV
+F-15	Global Trends Page	Overview of how total at-risk population has changed globally
+F-16	Search	Search bar for finding countries quickly
+F-17	Share / Screenshot	Easy sharing of current map state via URL parameters
+F-18	AI Assistant	Chat interface to ask questions about the data
+F-19	Newly at Risk Alerts	Highlight countries that crossed risk threshold in last 5 years
+P2 — Post-MVP Features
+Feature ID	Feature	Description
+F-20	User Accounts	Save comparisons, bookmark countries, custom dashboards
+F-21	Email Alerts	Subscribe to updates for specific countries/diseases
+F-22	PDF Report Export	Generate formatted PDF report for any country
+F-23	Subnational Data	Admin-level 1 (state/province) data for select countries
+F-24	Disease Outbreak Overlay	Layer showing historical recorded outbreaks on top of suitability map
+F-25	Health System Layer	Toggle to show hospital density, physician count overlay
+F-26	Embeddable Widgets	Map widget that other websites can embed
+P3 — Future Features
+Feature ID	Feature	Description
+F-27	ML Suitability Model	Replace threshold model with trained species distribution model
+F-28	Early Warning System	Real-time detection of rapid suitability increases
+F-29	API Access	Public API for organizations to query VectorShift data
+F-30	Custom Region Analysis	Draw custom area on map and get analysis
+Section 4: Information Architecture
+4.1 Site Map
+text
+
+VectorShift
+│
+├── Landing Page (/)
+│   ├── Hero Section
+│   ├── How It Works
+│   ├── Featured Insight
+│   ├── Disease Cards
+│   ├── Global Stats
+│   └── Call to Action
+│
+├── Explorer (/explorer)
+│   ├── Interactive Global Map
+│   ├── Disease Selector Panel
+│   ├── Time Slider
+│   ├── Scenario Toggle
+│   ├── Country Click Panel (overlay)
+│   ├── Risk Legend
+│   └── Layer Controls
+│
+├── Country Profile (/country/[slug])
+│   ├── Country Header
+│   ├── Risk Score Overview
+│   ├── Disease Risk Cards (all 6 diseases)
+│   ├── Historical Trend Chart
+│   ├── Future Projection Chart
+│   ├── Climate Drivers Section
+│   ├── Health System Indicators
+│   ├── Vulnerability Index
+│   ├── Neighboring Countries
+│   └── Data Sources & Citations
+│
+├── Compare (/compare)
+│   ├── Country Selector (A vs B)
+│   ├── Disease Selector
+│   ├── Side-by-Side Risk Charts
+│   ├── Side-by-Side Statistics
+│   ├── Divergence Analysis
+│   └── Share Comparison
+│
+├── Global Trends (/trends)
+│   ├── At-Risk Population Chart
+│   ├── Regional Breakdown
+│   ├── Disease-by-Disease Trends
+│   ├── Fastest Growing Risk Regions
+│   └── Historical Milestones Timeline
+│
+├── Data Explorer (/data)
+│   ├── Filter Controls
+│   ├── Data Table
+│   ├── Download CSV
+│   └── Data Dictionary
+│
+├── AI Assistant (/assistant)
+│   ├── Chat Interface
+│   ├── Suggested Questions
+│   └── Data Source Attribution
+│
+├── Methodology (/methodology)
+│   ├── How Suitability Is Calculated
+│   ├── Disease-by-Disease Parameters
+│   ├── Data Sources
+│   ├── Limitations
+│   └── Citations
+│
+└── About (/about)
+    ├── Project Story
+    ├── Mission
+    ├── Data Partners
+    └── Contact
+4.2 Navigation Structure
+Primary Navigation (Top Bar):
+
+text
+
+[VectorShift Logo]    Explorer | Trends | Compare | Data | Assistant    [Search] [Theme Toggle]
+Mobile Navigation:
+Hamburger menu revealing full-screen overlay with the same links plus country search.
+
+Section 5: Detailed Page Specifications
+Page 1: Landing Page ( / )
+Purpose: Convert curious visitors into engaged users. Explain what VectorShift is without jargon. Create an emotional response that makes people want to explore.
+
+Design Tone: Editorial, serious, data-forward. Similar to how The Pudding or Our World in Data presents data journalism. Not a SaaS marketing page.
+
+Section 1.1 — Hero
+Layout: Full viewport height. Dark background. Large text left-aligned. Live animated mini-map on the right side.
+
+Content:
+
+text
+
+HEADLINE (H1):
+"Climate change is moving disease.
+Watch it happen."
+
+SUBHEADLINE:
+"Dengue, malaria, and Lyme disease are spreading into 
+regions that never faced them before. VectorShift maps 
+where, when, and how fast."
+
+PRIMARY CTA BUTTON: "Explore the Map →"
+SECONDARY LINK: "How does this work? ↓"
+
+RIGHT SIDE: 
+Miniature animated world map cycling through 
+1990 → 2000 → 2010 → 2020 → 2024
+Showing dengue risk zones expanding — animated automatically
+Design Notes:
+
+Background is near-black (#0A0E14)
+Headline uses a high-contrast serif or geometric sans
+The mini-map animation should play on loop, silently demonstrating the product's core value
+A subtle counter below the CTA: "Tracking 6 diseases across 195 countries"
+States:
+
+Loading: Skeleton shimmer on the mini-map area
+Map fails to load: Static screenshot fallback image
+Section 1.2 — Urgency Numbers
+Layout: Full-width horizontal band with 4 statistics
+
+Content:
+
+text
+
+[  3.9 Billion  ]   [  8×  ]   [  47 Countries  ]   [  2°C  ]
+People at risk from    Increase in dengue    Newly reporting        Average warming
+mosquito-borne         cases in 20 years     dengue since 2000      needed for
+diseases                                                            significant spread
+Design Notes:
+
+Large numbers in accent color
+Labels in muted text
+Thin vertical dividers between stats
+Subtle animation: numbers count up when scrolled into view
+Section 1.3 — How It Works
+Layout: Three-step explanation with icon + title + description
+
+Content:
+
+text
+
+STEP 1                    STEP 2                    STEP 3
+[Thermometer Icon]        [Mosquito Icon]           [Map Icon]
+
+NASA Climate Data         Vector Biology            Risk Intelligence
+
+We use 40+ years of      We apply published        The result: an
+global temperature,      scientific thresholds      interactive map
+humidity, and            for each disease           showing where risk
+rainfall data from       vector's survival          is growing, shrinking,
+NASA satellites.         conditions.                or newly emerging.
+Section 1.4 — Featured Insight (Rotating Spotlight)
+Layout: Full-width dark card with a small map on the right and text on the left
+
+Content (first featured insight):
+
+text
+
+LABEL: "Featured Insight"
+
+HEADLINE: "Europe's Dengue Risk Has Grown 340% Since 2000"
+
+BODY: "Rising temperatures across the Mediterranean have 
+created suitable conditions for Aedes albopictus — the 
+tiger mosquito — to survive year-round in regions where 
+it previously could not overwinter. Italy, Spain, Greece, 
+and Croatia have all reported local dengue transmission 
+since 2022."
+
+[View Europe Analysis →]
+
+RIGHT: Small animated map of Europe with risk zones highlighted
+Design Notes:
+
+This section rotates between 3-4 featured insights
+Each has a unique accent color tied to its disease
+Auto-rotates every 8 seconds with manual dot navigation
+Section 1.5 — Disease Cards
+Layout: Horizontal scroll on mobile, 3-column grid on desktop
+
+Six cards, one per disease:
+
+text
+
+CARD TEMPLATE:
+[Disease Icon / Illustration]
+Disease Name
+Carrier Vector
+At-Risk Population: [number]
+Risk Trend: [↑ Growing / → Stable / ↓ Declining]
+Primary Regions Affected: [list]
+[Explore Dengue →]
+Cards:
+
+Dengue Fever — Aedes aegypti mosquito — 3.9 billion at risk
+Malaria — Anopheles mosquito — 3.3 billion at risk
+Zika Virus — Aedes aegypti mosquito — 2.6 billion at risk
+Chikungunya — Aedes albopictus — 1.3 billion at risk
+Lyme Disease — Ixodes tick — 300 million newly at risk
+Leishmaniasis — Phlebotomus sandfly — 350 million at risk
+Section 1.6 — Interactive Teaser Map
+Layout: Full-width, 60vh height map showing the world
+
+Behavior:
+
+Non-interactive scrolling version of the Explorer map
+Auto-plays a slow animation of dengue risk 2000 → 2024
+Overlay text: "This is 24 years of dengue risk expansion. What happens next?"
+CTA button centered over map: "Open Full Explorer →"
+Section 1.7 — Who Uses VectorShift
+Layout: Three columns with persona cards
+
+Content:
+
+text
+
+[Health Officials]          [Researchers]           [Journalists]
+Prepare health systems      Access cleaned,         Tell data-backed
+for emerging threats        standardized data       stories with visuals
+before outbreaks occur.     across countries        that readers feel.
+                            and decades.
+Section 1.8 — Footer
+Content:
+
+text
+
+LEFT: VectorShift logo + tagline
+CENTER: Navigation links
+RIGHT: Data sources acknowledgment (NASA, WHO, UN)
+
+BOTTOM BAR:
+"Data sourced from NASA POWER, WHO Global Health Observatory, 
+CMIP6, GBIF, WorldPop. VectorShift is a non-commercial 
+research platform. All data is free to use with attribution."
+
+[GitHub] [Methodology] [Contact]
+Page 2: Explorer ( /explorer )
+Purpose: The core product. This is where users spend most of their time. Must be immediately understandable, highly interactive, and visually stunning.
+
+Layout: Full-screen application layout. No traditional page scroll. The map fills the entire viewport. Controls overlay the map.
+
+Explorer Layout Structure
+text
+
+┌─────────────────────────────────────────────────────────┐
+│  [Logo]  [Nav]                    [Search] [Theme]       │  ← Top Bar (64px)
+├─────────────────────────────────────────────────────────┤
+│  ┌──────────────┐                                        │
+│  │ Disease      │                                        │
+│  │ Selector     │         FULL SCREEN MAP                │
+│  │ Panel        │                                        │
+│  │ (Left)       │                                        │
+│  │              │                                        │
+│  │              │                                   [?]  │
+│  │              │                         [+] [-] [⊙]   │
+│  └──────────────┘                                        │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │  TIME SLIDER: 1981 ──────────|──────────── 2050   │  │  ← Bottom Bar
+│  │  [◀] [▶ Play]   [SSP1] [SSP2] [SSP5]    [Legend] │  │
+│  └────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+Left Panel — Disease Selector
+Width: 240px, collapsible to 0px with toggle
+
+Content:
+
+text
+
+DISEASES
+──────────
+○ ● Dengue
+○   Malaria
+○   Zika
+○   Chikungunya
+○   Lyme Disease
+○   Leishmaniasis
+
+──────────
+LAYERS
+──────────
+☑ Risk Suitability
+☐ Health System
+☐ Population Density
+☐ Newly At Risk
+
+──────────
+FILTER BY RISK
+──────────
+○ All Countries
+○ High Risk Only
+○ Newly At Risk
+○ Declining Risk
+Design Notes:
+
+Active disease has filled circle and highlighted text
+Hover on disease name shows tooltip with brief definition
+Layer toggles are checkbox-style with smooth fade transitions
+Map — Core Behavior
+Map Library: Mapbox GL JS (free tier sufficient for MVP)
+
+Base Map Style: Custom dark style (described in Design Section)
+
+Country Rendering:
+
+Countries are rendered as filled polygons (GeoJSON)
+Fill color interpolated from suitability score:
+0.0 — 0.2: Very dark, near background (#1a1f2e)
+0.2 — 0.4: Muted green-gray (#2d4a3e)
+0.4 — 0.6: Amber (#8B6914)
+0.6 — 0.8: Orange (#C4501A)
+0.8 — 1.0: Deep red (#8B1A1A)
+Country borders: 0.5px, #2a2f3e
+Hover state: Slightly lighter fill + 1px brighter border
+"Newly at risk" countries: Subtle animated pulsing border in amber
+Country Click Behavior:
+Clicking a country opens a side panel (slides in from right, 380px wide):
+
+text
+
+COUNTRY PANEL CONTENT:
+──────────────────────
+[Flag emoji] EGYPT
+Risk Level: HIGH ●
+Current Suitability Score: 0.78 / 1.0
+
+DENGUE RISK
+Suitability: ████████░░ 78%
+Change vs 2000: +34%
+▲ Risk has grown significantly
+
+CLIMATE CONTEXT
+Avg Temperature 2024: 28.4°C
+Change since 1981: +1.8°C
+Annual Rainfall: 25mm
+Humidity Index: 0.6
+
+HEALTH SYSTEM
+Hospital Beds/1000: 1.6
+Physicians/1000: 0.8
+Preparedness Score: 4/10
+
+[View Full Profile →]   [Compare →]
+Time Slider — Behavior
+Position: Bottom of screen, full width
+
+Range: 1981 (historical start) → 2023 (present) → 2050 (projected)
+
+Visual design:
+
+Track is a horizontal line
+Left of 2024: Solid color (historical, confirmed data)
+Right of 2024: Dashed line (projected data)
+A small divider marker at 2024 labeled "TODAY"
+Thumb: Circle with current year displayed inside
+Controls:
+
+Drag thumb manually
+Play/Pause button: Auto-advances year by year, 500ms per step
+Speed control: Slow / Normal / Fast
+Click any year on the track to jump
+When year changes:
+
+Map colors smoothly animate to new values (300ms transition)
+Active year displayed prominently above slider
+If year > 2024: Scenario selector becomes active, label changes to "PROJECTED"
+Scenario Toggle (active when year > 2024)
+text
+
+Climate Scenario:
+[SSP1-2.6 Optimistic]  [SSP2-4.5 Middle Path]  [SSP5-8.5 Worst Case]
+
+ⓘ  SSP1: Emissions cut aggressively. 1.5-2°C warming by 2100.
+Behavior:
+
+Selecting scenario instantly recalculates suitability for the projected year
+Small label on map: "SHOWING PROJECTED DATA — SSP2 Scenario"
+Comparison mode: Can show two scenarios side by side (split-screen)
+Legend
+Position: Bottom right corner of map
+
+Content:
+
+text
+
+DENGUE SUITABILITY ─────────────
+■ Very High (0.8—1.0)
+■ High (0.6—0.8)
+■ Moderate (0.4—0.6)
+■ Low (0.2—0.4)
+□ Minimal (0.0—0.2)
+⬡ Newly At Risk (since 2019)
+─ No Data Available
+Explorer States
+Loading state:
+
+Map tiles load with skeleton shimmer overlay
+"Loading climate data for 1990..." progress text
+Countries appear one by one as data resolves
+Error state:
+
+Map still shows but with neutral gray colors
+Toast notification: "Risk data temporarily unavailable. Showing cached data from [date]."
+No data state:
+
+Countries with no data shown in hatched pattern (diagonal lines)
+Tooltip on hover: "No data available for this country"
+Mobile behavior:
+
+Left panel collapses to bottom drawer
+Time slider moves to top
+Country panel becomes full-screen modal
+Map takes full screen
+Page 3: Country Profile ( /country/[slug] )
+Purpose: Deep dive into a single country's complete climate-disease risk picture. This is the most data-rich page.
+
+Layout: Traditional scrollable page. Left sidebar for navigation within the page. Main content on right.
+
+Country Profile Structure
+text
+
+┌─────────────────────────────────────────────────┐
+│  [← Back to Map]                                 │
+│                                                   │
+│  🇪🇬  Egypt                                      │
+│  Cairo, Middle East & North Africa               │
+│                                                   │
+│  ● HIGH RISK    Updated: Jan 2024                │
+│                                                   │
+│  [Share] [Compare] [Download Data]               │
+├─────────────┬───────────────────────────────────┤
+│             │                                     │
+│  PAGE NAV   │  MAIN CONTENT                      │
+│  ─────────  │                                     │
+│  Overview   │  SECTION 1: Risk Overview          │
+│  Dengue     │  SECTION 2: Disease-by-Disease     │
+│  Malaria    │  SECTION 3: Historical Trends      │
+│  Zika       │  SECTION 4: Future Projections     │
+│  Chikung.   │  SECTION 5: Climate Drivers        │
+│  Lyme       │  SECTION 6: Health System          │
+│  Leishm.    │  SECTION 7: Vulnerability Index    │
+│  Climate    │  SECTION 8: Neighbors              │
+│  Health Sys │  SECTION 9: Data & Sources         │
+│  Sources    │                                     │
+└─────────────┴───────────────────────────────────┘
+Country Profile — Section by Section Content
+Section 1 — Risk Overview
+
+text
+
+OVERALL VULNERABILITY SCORE: 7.2 / 10
+
+[VISUAL: Gauge/dial showing 7.2]
+
+This score combines:
+- Disease Suitability Risk: 8/10 (HIGH)
+- Health System Capacity: 4/10 (WEAK)  
+- Population Exposure: 6/10 (MODERATE)
+
+KEY INSIGHT:
+"Egypt's climate has become significantly more suitable for 
+dengue mosquitoes since 2000, while health system capacity 
+has not kept pace with the growing risk."
+Section 2 — Disease-by-Disease Risk Cards
+
+Six cards, one per disease:
+
+text
+
+DENGUE FEVER
+──────────────────────────────
+Current Suitability: 78%      ████████░░
+Trend: ▲ Growing (+34% since 2000)
+Climate Status: Temperature and humidity are within 
+the optimal range for Aedes aegypti mosquitoes 
+during 8 months of the year.
+
+Primary Risk Months: April — October
+Peak Risk Region: Nile Delta, Red Sea Coast
+Historical Cases: [line sparkline 2000-2023]
+
+[Dengue Details ▼]
+Section 3 — Historical Trend Chart
+
+Full-width line chart:
+
+X axis: 1981 to 2023
+Y axis: Suitability score 0 to 1
+One line per disease (each a different color)
+Toggle individual diseases on/off
+Hover tooltip showing exact value per year
+Annotations on chart: "2016: El Niño event" / "2003: Record heat"
+Section 4 — Future Projections Chart
+
+Same format as Section 3 but:
+
+Left of 2024: Solid lines
+Right of 2024: Dashed lines (three dashes, one per scenario)
+Scenario selector above chart
+Confidence band (shaded area) around projected lines
+Label: "Projections based on CMIP6 climate models. Higher uncertainty further into the future."
+Section 5 — Climate Drivers
+
+text
+
+WHY IS RISK CHANGING?
+
+TEMPERATURE          RAINFALL           HUMIDITY
++1.8°C               -12% annual        +0.04 index
+since 1981           precipitation      points since 1981
+
+"Egypt has warmed 1.8°C since 1981, extending the period 
+when mosquito breeding conditions are met from 6 months 
+to 8 months annually."
+Section 6 — Health System Indicators
+
+text
+
+HEALTH SYSTEM CAPACITY
+
+Hospital Beds: 1.6 per 1,000 population
+  [Global avg: 2.7]  [Regional avg: 2.1]
+  ████░░░░░░ Below average
+
+Physicians: 0.8 per 1,000 population
+  [WHO recommended: 1.0]
+  ███░░░░░░░ Below recommended
+
+Vector Control Programs: Moderate (3/5)
+Epidemic Preparedness Index: 38/100 (from GHS Index)
+Section 7 — Vulnerability Index
+
+Visual breakdown:
+
+text
+
+VULNERABILITY INDEX: 7.2 / 10
+
+How we calculate this:
+
+Disease Suitability Risk     ×  0.40  =  3.12
+Health System Weakness       ×  0.35  =  1.40
+Population at Risk           ×  0.15  =  0.45
+Climate Trend Direction      ×  0.10  =  0.25
+                                       ────────
+                                         7.22
+
+Countries with similar scores:
+Sudan (7.4)  |  Yemen (7.8)  |  Libya (6.9)
+Section 8 — Neighboring Countries
+
+Horizontal card row showing adjacent countries with their scores and an arrow showing "Egypt is [higher/lower] risk than its neighbors."
+
+Section 9 — Data & Sources
+
+Full citation list with links to every data source used on this page.
+
+Page 4: Compare ( /compare )
+Purpose: Allow users to select two countries and compare their complete risk profiles side by side.
+
+Layout: Two-column comparison, identical structure on each side.
+
+Compare Page Structure
+text
+
+┌────────────────────────────────────────────────────┐
+│  COMPARE COUNTRIES                                  │
+│                                                     │
+│  [🇪🇬 Egypt ▼]   vs   [🇮🇹 Italy ▼]              │
+│                                                     │
+│  Disease: [Dengue ▼]   Period: [2000-2024 ▼]       │
+│                                                     │
+│  [Share Comparison]  [Switch Countries]             │
+├─────────────────────┬──────────────────────────────┤
+│  EGYPT              │  ITALY                        │
+│  ─────────────────  │  ──────────────────────────  │
+│  Risk Score: 7.2    │  Risk Score: 5.8              │
+│                     │                               │
+│  Suitability: 78%   │  Suitability: 61%             │
+│  ████████░░         │  ██████░░░░                   │
+│                     │                               │
+│  [TREND CHART]      │  [TREND CHART]                │
+│  (same time range)  │  (same time range)            │
+│                     │                               │
+│  Climate Context    │  Climate Context               │
+│  Temp: 28.4°C       │  Temp: 17.2°C                 │
+│  +1.8°C since 1981  │  +1.6°C since 1981            │
+│                     │                               │
+│  Health System      │  Health System                │
+│  Score: 4/10        │  Score: 8/10                  │
+│                     │                               │
+│  Vulnerability      │  Vulnerability                │
+│  Index: 7.2         │  Index: 3.4                   │
+│                     │                               │
+├─────────────────────┴──────────────────────────────┤
+│  KEY DIFFERENCES                                    │
+│  ─────────────────────────────────────────────────  │
+│  "Egypt has 17% higher dengue suitability than      │
+│  Italy, but Italy's health system is significantly  │
+│  better prepared. The critical difference is that   │
+│  dengue is new to Italy — health systems there      │
+│  have no historical experience with the disease."   │
+└────────────────────────────────────────────────────┘
+Page 5: Global Trends ( /trends )
+Purpose: Show the big picture — how has global disease risk changed over decades, and what does the future look like?
+
+Layout: Scrollable editorial page with large data visualizations.
+
+Trends Page Sections
+Section 1 — The Big Number
+
+text
+
+[ANIMATED COUNTER]
+2.1 Billion
+Additional people now live in areas suitable for 
+dengue mosquitoes compared to 1990.
+Section 2 — Global Risk Map Animation
+Auto-playing version of the explorer map cycling through 1990 to 2024.
+
+Section 3 — At-Risk Population by Decade
+Area chart showing total at-risk population for each disease from 1981 to 2050.
+
+Section 4 — Regional Breakdown
+Horizontal bar chart comparing risk by WHO region: Africa, Americas, South-East Asia, Europe, Eastern Mediterranean, Western Pacific.
+
+Section 5 — Fastest Growing Risk Countries
+Ranked list of countries with the largest suitability score increase since 2000.
+
+Section 6 — Newly At Risk Countries
+World map highlighting only countries that crossed the risk threshold in the last 10 years.
+
+Section 7 — Disease-by-Disease Timeline
+One section per disease with its own trend story and key milestone annotations.
+
+Page 6: Data Explorer ( /data )
+Purpose: Provide raw data access for researchers who want to download and use the underlying data.
+
+Data Explorer Structure
+text
+
+┌────────────────────────────────────────────────┐
+│  DATA EXPLORER                                  │
+│                                                 │
+│  FILTERS                                        │
+│  ─────────────────────────────────────────────  │
+│  Disease:  [All ▼]                              │
+│  Region:   [All ▼]                              │
+│  Country:  [All ▼]                              │
+│  Year:     [1981] to [2024]                     │
+│  Risk Level: □ Low  □ Moderate  □ High          │
+│                                                 │
+│  [Apply Filters]   [Reset]   [Download CSV ↓]  │
+│                                                 │
+│  Showing 2,847 records                          │
+├────────────────────────────────────────────────┤
+│  Country  │ Disease  │ Year │ Score │ Trend     │
+│  ─────────┼──────────┼──────┼───────┼─────────  │
+│  Egypt    │ Dengue   │ 2024 │ 0.78  │ ▲ +0.12   │
+│  Egypt    │ Malaria  │ 2024 │ 0.45  │ → +0.01   │
+│  Egypt    │ Zika     │ 2024 │ 0.67  │ ▲ +0.09   │
+│  ...      │ ...      │ ...  │ ...   │ ...       │
+└────────────────────────────────────────────────┘
+
+DATA DICTIONARY (expandable)
+─────────────────────────────
+Score: Habitat suitability score from 0.0 (unsuitable) 
+       to 1.0 (optimal conditions). Calculated from 
+       temperature, humidity, and rainfall against 
+       published vector biology thresholds.
+Page 7: AI Assistant ( /assistant )
+Purpose: Allow users to ask natural language questions and get data-backed answers drawn from VectorShift's database.
+
+AI Assistant Structure
+text
+
+┌─────────────────────────────────────────────────┐
+│  VECTORSHIFT ASSISTANT                           │
+│  Ask questions about climate and disease risk    │
+├─────────────────────────────────────────────────┤
+│                                                  │
+│  SUGGESTED QUESTIONS:                            │
+│  ┌──────────────────────────────────────────┐   │
+│  │ "Which countries in Europe are newly     │   │
+│  │  at risk for dengue?"                    │   │
+│  └──────────────────────────────────────────┘   │
+│  ┌──────────────────────────────────────────┐   │
+│  │ "Is malaria risk growing in Pakistan?"   │   │
+│  └──────────────────────────────────────────┘   │
+│  ┌──────────────────────────────────────────┐   │
+│  │ "Compare dengue risk in Egypt vs Italy"  │   │
+│  └──────────────────────────────────────────┘   │
+│                                                  │
+│  ─────────────────────────────────────────────  │
+│                                                  │
+│  [AI Response Area]                              │
+│                                                  │
+│  "Based on VectorShift data, 12 European        │
+│   countries have crossed the dengue suitability  │
+│   threshold since 2010. The most significant    │
+│   increases are in Italy (+0.31 since 2000),    │
+│   Spain (+0.28), and Greece (+0.24)..."         │
+│                                                  │
+│  Source: VectorShift suitability scores,        │
+│  derived from NASA POWER climate data.          │
+│                                                  │
+│  [View on Map →]  [View Italy Profile →]        │
+│                                                  │
+├─────────────────────────────────────────────────┤
+│  [Type your question...]              [Send →]   │
+└─────────────────────────────────────────────────┘
+AI Behavior Rules:
+
+Only answers questions about topics covered in VectorShift's database
+Always cites the data source for its answers
+Does not give medical advice
+When uncertain: "VectorShift data suggests X, but I recommend consulting [source] for more detail"
+Links to relevant country profiles or map views where possible
+Includes disclaimer: "This is research intelligence, not medical advice."
+Page 8: Methodology ( /methodology )
+Purpose: Establish scientific credibility. This page is what separates VectorShift from a student project and makes it feel like a real research platform.
+
+Methodology Page Content
+Section 1 — How Suitability Is Calculated
+
+Plain language explanation:
+
+text
+
+HOW WE MEASURE RISK
+
+VectorShift calculates a "habitat suitability score" for 
+each disease vector in each country for each year. This 
+score represents how suitable the climate conditions are 
+for that vector to survive and reproduce.
+
+A score of 1.0 means conditions are perfect for the 
+vector. A score of 0.0 means conditions cannot support 
+the vector at all.
+
+The score is calculated using temperature, humidity, 
+and rainfall data from NASA satellites, compared against 
+published biological thresholds from peer-reviewed research.
+Section 2 — Disease Parameters Table
+
+text
+
+DISEASE PARAMETERS
+
+DENGUE (Aedes aegypti)
+─────────────────────────────────────────────────
+Temperature range:      18°C — 34°C (optimal 25—30°C)
+Minimum winter temp:    > 10°C in coldest month
+Humidity requirement:   > 60% relative humidity
+Altitude limit:         < 2,000 meters
+Rainfall (breeding):    > 50mm/month for at least 3 months
+Source: Brady et al. (2014), PLOS Neglected Tropical Diseases
+
+MALARIA (Anopheles gambiae / A. stephensi)
+─────────────────────────────────────────────────
+Temperature range:      16°C — 32°C (optimal 20—27°C)
+Transmission threshold: > 18°C sustained
+Humidity requirement:   > 60% relative humidity
+Altitude limit:         < 2,500 meters (A. gambiae)
+Source: Ryan et al. (2020), PLOS Biology
+
+[Repeat for each disease...]
+Section 3 — Data Sources
+
+Full table of all data sources with:
+
+Source name
+Provider
+Coverage
+Resolution
+Time period
+License
+Direct link
+Section 4 — Limitations
+
+Honest section explaining:
+
+Suitability ≠ guaranteed outbreaks
+Country-level data misses within-country variation
+Model uncertainty increases further into the future
+Disease reporting gaps in some countries
+Climate model uncertainty
+Section 5 — Citations
+
+Full academic reference list in APA format.
+
+Section 6: Content Strategy
+6.1 Writing Tone
+Context	Tone
+Headlines	Short, factual, impactful. Never sensational.
+Explanatory text	Clear, plain language. Assume intelligence, not expertise.
+Data labels	Precise. Always show units. Never ambiguous.
+Error messages	Human and helpful. Not technical.
+Tooltips	Brief and informative. One to two sentences maximum.
+Methodology	Scientific but readable. Like a well-written Wikipedia article.
+6.2 Empty States
+Empty State	What to Show
+No country selected on map	"Click any country to see its risk profile" with a subtle animated arrow
+Comparison with one country selected	"Now select a second country to compare"
+Data Explorer with no results	"No data matches your filters. Try broadening your selection."
+AI Assistant before first message	Suggested questions panel
+Country with no disease data	"Data not available for this disease in this country. WHO surveillance data may be incomplete."
+6.3 Loading States
+Loading State	Treatment
+Map initial load	Skeleton shimmer over map + "Loading global climate data..."
+Country panel opening	Skeleton shimmer in panel with country name appearing first
+Chart rendering	Chart axes appear first, then data animates in
+AI response generating	Animated typing dots with "Analyzing VectorShift data..."
+Data export	Progress bar with "Preparing your download..."
+PART TWO: DESIGN REQUIREMENTS
+Section 7: Design Language
+7.1 Design Philosophy
+VectorShift should feel like it was designed by a team that includes a data journalist, a cartographer, and a senior product designer — not by a developer using a template.
+
+Avoid:
+
+Purple gradients on hero sections
+Floating glowing blobs in backgrounds
+Glassmorphism for its own sake
+Generic SaaS card layouts
+Stock photography of people smiling at laptops
+Decorative icons that don't add information
+Pursue:
+
+The editorial seriousness of The Economist's data journalism
+The visual intelligence of Our World in Data
+The dark map aesthetic of Mapbox's own showcase projects
+The typographic confidence of Bloomberg's data visualizations
+The precision of Figma's own documentation
+7.2 Design Inspiration References
+Reference	What to Take From It	URL
+The Pudding	Scrollytelling, editorial data presentation, narrative structure	pudding.cool
+Our World in Data	Data honesty, source citation, clear chart design, accessibility	ourworldindata.org
+Mapbox Showcase	Dark map aesthetics, custom map styling, interactive geo-visualization	mapbox.com/gallery
+Bloomberg Graphics	Typography over decoration, charts as heroes	bloomberg.com/graphics
+Pitch.com	Clean dark UI, confident typography, professional spacing	pitch.com
+Linear.app	Precision spacing, professional dark UI, component consistency	linear.app
+Vercel.com	Dark theme done right without looking gimmicky	vercel.com
+Awwwards — Datacenter projects	How data platforms can look premium	awwwards.com
+Windyty / Windy.com	Full-screen weather map done beautifully	windy.com
+Satellite imagery platforms (Sentinel Hub)	Professional geospatial UI	sentinel-hub.com
+7.3 Color System
+Design Decision: The palette is built around dark navy as the foundation, with amber/orange as the primary accent (representing heat and risk), and a red spectrum for high-risk states. This connects intuitively to the subject matter — heat maps, risk, urgency — without being clichéd.
+
+Base Palette
+text
+
+BACKGROUND COLORS
+─────────────────
+background-primary:    #080C14   ← Near black. Deepest backgrounds.
+background-secondary:  #0D1220   ← Card backgrounds, panels
+background-tertiary:   #131828   ← Elevated elements, dropdowns
+background-hover:      #1A2035   ← Hover states on interactive elements
+
+BORDER COLORS
+─────────────────
+border-subtle:         #1E2640   ← Dividers, card borders
+border-default:        #2A3358   ← More visible borders
+border-strong:         #3D4F7C   ← Active states, focus rings
+
+TEXT COLORS
+─────────────────
+text-primary:          #F0F4FF   ← Main content, headlines
+text-secondary:        #8B9CC0   ← Labels, secondary info
+text-tertiary:         #556080   ← Captions, metadata
+text-disabled:         #3A4560   ← Disabled states
+text-inverse:          #080C14   ← Text on light backgrounds
+
+ACCENT COLORS (Primary — Amber/Risk)
+─────────────────
+accent-50:             #FFF8E7
+accent-100:            #FEEFC3
+accent-200:            #FCD97A
+accent-300:            #F9BE42
+accent-400:            #F5A623   ← Primary accent. CTA buttons, highlights.
+accent-500:            #E08B0A
+accent-600:            #B86D06
+
+RISK SCALE COLORS (Map gradient)
+─────────────────
+risk-none:             #1A1F2E   ← 0.0—0.2 suitability
+risk-low:              #1E3A2F   ← 0.2—0.4 (green-tinted dark)
+risk-moderate:         #4A3B1A   ← 0.4—0.6 (amber-tinted dark)
+risk-high:             #6B2D10   ← 0.6—0.8 (orange-red dark)
+risk-critical:         #7A1515   ← 0.8—1.0 (deep red)
+risk-new:              #2A4A6B   ← Newly at risk (blue-tinted — differentiated)
+
+SEMANTIC COLORS
+─────────────────
+success:               #1E6B4A   ← Declining risk, positive indicators
+warning:               #7A5A0A   ← Moderate risk, caution
+danger:                #7A1515   ← Critical risk
+info:                  #1A3A6B   ← Informational states
+Light Mode (Secondary)
+VectorShift is primarily a dark-mode product. Light mode exists for accessibility and user preference.
+
+text
+
+LIGHT MODE OVERRIDES
+─────────────────
+background-primary:    #F7F9FC
+background-secondary:  #FFFFFF
+background-tertiary:   #EEF1F8
+text-primary:          #0D1220
+text-secondary:        #4A5578
+border-default:        #D0D9F0
+7.4 Typography
+Design Decision: Use a system combining a geometric sans-serif for UI and data (clean, neutral, highly legible) with a high-quality monospace for data values and scores (conveys precision).
+
+Font Selection
+Primary Font: Inter
+Source: Google Fonts (free)
+Use: All body text, UI labels, navigation, buttons, descriptions
+
+Display Font: Cabinet Grotesk (or fallback: DM Sans)
+Source: Fontshare (free) or Google Fonts
+Use: Hero headlines, large statistics, page titles
+Reasoning: Slightly more character than Inter, gives editorial feel
+
+Monospace Font: JetBrains Mono
+Source: Google Fonts (free)
+Use: Numerical scores, percentages, data values, code references
+Reasoning: Signals precision and data accuracy
+
+Type Scale
+text
+
+TYPE SCALE (rem, base 16px)
+───────────────────────────
+display-2xl:   4.5rem / 72px  — Hero headline, major statistics
+display-xl:    3.75rem / 60px — Section heroes, page titles
+display-lg:    3rem / 48px    — Feature headlines
+display-md:    2.25rem / 36px — Major section titles
+display-sm:    1.875rem / 30px — Card titles, sub-section heads
+text-xl:       1.25rem / 20px — Lead paragraphs, featured text
+text-lg:       1.125rem / 18px — Body text, descriptions  
+text-md:       1rem / 16px    — Default body text
+text-sm:       0.875rem / 14px — Labels, captions, secondary info
+text-xs:       0.75rem / 12px — Micro labels, tags, legal
+
+DATA VALUES (JetBrains Mono)
+data-xl:       2rem / 32px    — Major scores, key numbers
+data-lg:       1.5rem / 24px  — Chart labels, statistics
+data-md:       1rem / 16px    — Table values, inline data
+data-sm:       0.75rem / 12px — Axis labels, small data points
+Font Weights
+text
+
+Regular:    400 — Body text, descriptions
+Medium:     500 — Labels, navigation items
+Semibold:   600 — Section titles, card titles, buttons
+Bold:       700 — Headlines, major statistics
+Line Heights
+text
+
+Tight:   1.1 — Display/hero text
+Snug:    1.3 — Card titles, medium headings
+Normal:  1.5 — Body text (default)
+Relaxed: 1.7 — Long-form reading (methodology page)
+7.5 Spacing System
+Using an 8px base grid:
+
+text
+
+SPACING TOKENS
+──────────────
+space-1:   4px    — Micro gaps between related elements
+space-2:   8px    — Tight padding, icon gaps
+space-3:   12px   — Internal component padding (compact)
+space-4:   16px   — Standard internal padding
+space-5:   20px   — Medium gaps
+space-6:   24px   — Card padding, section internal spacing
+space-8:   32px   — Between card groups
+space-10:  40px   — Section separation (within page)
+space-12:  48px   — Major section separation
+space-16:  64px   — Page section separation
+space-20:  80px   — Hero section internal padding
+space-24:  96px   — Between major page sections
+space-32:  128px  — Very large separations
+
+COMPONENT SPECIFIC
+──────────────────
+nav-height:          64px
+panel-width-narrow:  240px
+panel-width-standard: 380px
+panel-width-wide:    480px
+map-control-padding: 16px
+card-padding:        24px
+card-padding-compact: 16px
+7.6 Border Radius
+text
+
+RADIUS TOKENS
+──────────────
+radius-sm:     4px   — Badges, tags, small elements
+radius-md:     8px   — Buttons, input fields
+radius-lg:     12px  — Cards, panels
+radius-xl:     16px  — Large cards, modals
+radius-2xl:    24px  — Hero elements
+radius-full:   9999px — Pills, avatars, circular elements
+
+DESIGN DECISION:
+VectorShift uses restrained border radius. Cards are 
+12px radius. Buttons are 8px radius. No excessive 
+rounding that makes the interface feel playful — 
+this is a serious research platform.
+7.7 Shadow System
+text
+
+SHADOW TOKENS (optimized for dark backgrounds)
+──────────────────────────────────────────────
+shadow-sm:    0 1px 2px 0 rgba(0,0,0,0.4)
+shadow-md:    0 4px 6px -1px rgba(0,0,0,0.5), 
+              0 2px 4px -1px rgba(0,0,0,0.3)
+shadow-lg:    0 10px 15px -3px rgba(0,0,0,0.6), 
+              0 4px 6px -2px rgba(0,0,0,0.4)
+shadow-xl:    0 20px 25px -5px rgba(0,0,0,0.7), 
+              0 10px 10px -5px rgba(0,0,0,0.4)
+shadow-glow-accent: 0 0 20px rgba(245,166,35,0.15)  ← Used sparingly on CTAs
+shadow-glow-risk:   0 0 16px rgba(122,21,21,0.2)    ← Used on high-risk indicators
+7.8 Icon Style
+Source: Lucide Icons (free, open source, consistent style)
+Alternative: Phosphor Icons (free, more weight variety)
+
+Icon Style Rules:
+
+Use outline/stroke style exclusively. No filled icons unless indicating active state.
+Stroke width: 1.5px
+Standard sizes: 16px (inline), 20px (buttons), 24px (navigation), 32px (feature icons)
+Never use decorative icons. Every icon communicates function.
+Disease-specific icons: Custom SVG illustrations (not Lucide). Simple, scientific-feeling. Not cartoon.
+Disease Icon Style:
+Each disease gets a minimal, scientific-looking icon — not a clipart mosquito but a clean SVG silhouette that fits in the design system. These are the only custom illustrations in the product.
+
+7.9 Component Library
+Primary Component Library: shadcn/ui
+
+Reason: Un-opinionated, headless, fully customizable. Not a pre-styled kit that limits you.
+Install only the components you need
+Fully override with VectorShift design tokens
+Additional Components:
+
+Maps: Mapbox GL JS
+Charts: Recharts (primary) + D3.js (for complex custom visualizations)
+Time slider: Custom built (React + CSS, no library dependency)
+Data table: TanStack Table (headless, full control)
+Animations: Framer Motion
+7.10 Map Design Specification
+The map is the most important visual element in VectorShift. It must look custom, not default.
+
+Custom Map Style — "VectorShift Dark"
+This is a custom Mapbox style. Build it in Mapbox Studio (free).
+
+Base Map Philosophy:
+
+The map is a backdrop for data — it should be dark and understated
+Country fills will be controlled by the application (GeoJSON layer), so the base map's country fill should be transparent or near-transparent
+Only geographic context should show: coastlines, large water bodies, mountain shading
+Base Map Layers (what to keep/remove):
+
+text
+
+KEEP:
+- Ocean: Very dark navy (#080C14 to #0D1220 gradient, deeper to shallower)
+- Country boundaries: 0.5px, color #1E2640
+- Coastlines: 0.8px, color #1A2040
+- Major rivers: 0.5px, color #0F1830, only at zoom 5+
+- Terrain hillshading: Very subtle, 10% opacity, adds geographic depth
+- Major city labels: Only at zoom 4+, text-secondary color
+
+REMOVE:
+- Country fill colors (application controls this)
+- Road networks (clutters at world zoom level)
+- Points of interest
+- Transit lines
+- Default Mapbox labels (replace with custom styled ones)
+- Administrative division fills
+
+TYPOGRAPHY ON MAP:
+- Country names: Inter Medium, 11px, text-tertiary (#556080), appear at zoom 3
+- Capital city dots: 4px circles, border-default color, zoom 4+
+- Ocean labels: "ATLANTIC OCEAN" style, Inter Light, tracking +0.2em, text-tertiary
+Zoom Level Behavior:
+
+text
+
+Zoom 1-2:  World view. Country names hidden. Only major landmasses visible.
+Zoom 3:    Country names appear. No cities.
+Zoom 4-5:  Capital cities appear. Major rivers.
+Zoom 6+:   Province/state boundaries appear (subtle). Cities appear.
+Zoom 8+:   Detailed city labels. Roads appear (minimal).
+Application GeoJSON Layer (rendered by app, not Mapbox style):
+
+Country polygons filled with risk color
+Rendered as a Mapbox fill layer above base map but below labels
+Smooth color interpolation using Mapbox expression: ['interpolate', ['linear'], ['get', 'score'], ...]
+Transition duration: 300ms when year changes
+"Newly at Risk" Animation:
+Countries that crossed the risk threshold in the last 5 years have an animated border:
+
+Border color: #F5A623 (accent)
+Animation: Slow pulse, opacity 0.6 → 1.0 → 0.6, 2-second cycle
+Implemented as Mapbox line layer with opacity animation
+Map References for Your Research
+Reference	What to Study
+Mapbox Dark Matter style	Base for our custom dark style
+Windy.com	How to overlay data on a dark map beautifully
+Mapbox GL JS Examples — Choropleth	Exactly the pattern for country risk coloring
+Google Earth Engine Explorer	Tone of professional geospatial platforms
+FlightRadar24	Dark map with live data overlay — reference for panel design
+Mapbox Showcase — Felt.com	Modern collaborative map aesthetic
+Climate.gov maps	How scientific data is presented on maps by professionals
+7.11 Animation & Interaction Specification
+Animation Philosophy: Every animation must serve a purpose. No animations just for decoration.
+
+Transition Library: Framer Motion
+
+Standard Transitions:
+
+text
+
+PAGE TRANSITIONS
+────────────────
+Page enter:     Fade in, Y: 8px → 0, duration: 200ms, ease: easeOut
+Page exit:      Fade out, duration: 150ms, ease: easeIn
+
+PANEL TRANSITIONS
+────────────────
+Country panel open:   Slide from right, X: 380px → 0, duration: 250ms, ease: [0.25, 0, 0, 1]
+Country panel close:  Slide to right, X: 0 → 380px, duration: 200ms
+Left panel collapse:  Width 240px → 0, duration: 200ms
+Dropdown open:        Scale Y 0.9 → 1, fade in, duration: 150ms
+
+DATA TRANSITIONS
+────────────────
+Number count-up:      Count from 0 to value over 1000ms, ease: easeOut
+Chart lines draw:     Draw from left to right over 800ms when entering viewport
+Map color change:     300ms linear interpolation (Mapbox native)
+Time slider advance:  500ms per year when playing
+
+HOVER STATES
+────────────────
+Buttons:        Background color transition, 150ms
+Cards:          Border color + shadow, 200ms
+Map countries:  Fill brightens, 100ms (Mapbox native)
+Navigation:     Underline slides in from left, 200ms
+
+LOADING
+────────────────
+Skeleton shimmer:     Gradient sweep, 1.5s cycle, infinite
+Spinner:              Only for AI response waiting, 1s rotation
+Progress bar:         For file downloads, smooth fill
+The Time Slider Animation (most important):
+When the play button is pressed, the map should feel like watching a documentary — smooth, continuous, compelling. Each year's data renders in 500ms. Country colors smoothly interpolate. The year counter in the slider thumb smoothly ticks up. The effect is like watching disease risk slowly spread across the world in real time.
+
+Section 8: Responsive Design Specification
+8.1 Breakpoints
+text
+
+BREAKPOINTS
+───────────
+mobile:    < 640px     — Single column, simplified UI
+tablet:    640—1024px  — Two-column where needed, condensed panels
+desktop:   1024—1440px — Full layout
+wide:      > 1440px    — Max-width containers, centered content
+8.2 Page-by-Page Responsive Behavior
+Landing Page:
+
+Mobile: Single column, hero text stacks above map preview, stats stack vertically, disease cards in 2-column grid
+Tablet: Two columns on stats, disease cards in 3-column grid
+Desktop: Full layout as described
+Explorer:
+
+Mobile: Map fills screen. Disease selector moves to bottom drawer (swipe up to open). Time slider sits above bottom drawer. Country panel becomes full-screen modal.
+Tablet: Narrow left panel (200px). Condensed time slider. Country panel 300px wide.
+Desktop: Full layout as described
+Country Profile:
+
+Mobile: Left sidebar navigation becomes sticky top tab bar. All sections stack vertically.
+Tablet: Condensed sidebar, main content takes 75% width.
+Compare:
+
+Mobile: Vertical comparison instead of side-by-side. Country A data above Country B data. Toggle to switch.
+Tablet: Two columns maintained.
+PART THREE: DATA & CONTENT SPECIFICATION
+Section 9: Data Architecture
+9.1 Data Sources — Complete Specification
+Source 1: NASA POWER (Primary Climate Data)
+What it provides:
+Monthly averages for temperature (T2M), minimum temperature (T2M_MIN), humidity (RH2M), and precipitation (PRECTOTCORR) for any location on Earth from 1981 to present.
+
+Coverage: Global, every point on Earth
+
+Resolution: 0.5° × 0.5° grid (approximately 55km × 55km at equator)
+
+For MVP: We use country-level aggregated values. NASA POWER provides direct country-level aggregation via their API.
+
+Update frequency: Monthly (new data ~2 months behind current date)
+
+API approach for data collection:
+
+text
+
+Endpoint: https://power.larc.nasa.gov/api/temporal/monthly/country
+Parameters:
+  - parameters: T2M,T2M_MIN,RH2M,PRECTOTCORR
+  - community: AG
+  - country: [ISO3 code]
+  - start: 1981
+  - end: 2023
+  - format: JSON
+
+Rate limit: No authentication required, reasonable use
+Strategy: Run collection script once per country, store results in DB.
+195 countries × 1 request each = 195 requests total. One-time operation.
+License: NASA Open Data — free to use, attribute NASA
+
+Source 2: WHO Global Health Observatory (GHO)
+What it provides:
+Disease incidence and mortality data by country and year for dengue, malaria, leishmaniasis, and others.
+
+Coverage: Country-level, most WHO member states
+
+Resolution: Country-level
+
+Update frequency: Annual
+
+Access method:
+
+text
+
+OData API: https://ghoapi.azureedge.net/api/
+Example for dengue:
+  GET /api/DENVFEVER_NUMBER → dengue fever notifications by country/year
+
+Data download:
+  Direct CSV download from GHO website is simpler for MVP
+  URL pattern: https://gho.who.int/api/data/[indicator]?$format=csv
+License: CC BY-NC-SA 3.0 IGO — free for non-commercial research
+
+Source 3: CMIP6 Climate Projections (via World Bank Climate Portal)
+What it provides:
+Future climate projections for temperature and precipitation under three scenarios (SSP1-2.6, SSP2-4.5, SSP5-8.5) for years 2025-2050 and 2051-2100.
+
+Coverage: Global, country-level aggregated
+
+Access method:
+The World Bank Climate Change Knowledge Portal provides pre-processed CMIP6 data at the country level in a user-friendly format. This is significantly easier than working with raw CMIP6 NetCDF files.
+
+text
+
+URL: https://climateknowledgeportal.worldbank.org/api/data/
+Documentation: climateknowledgeportal.worldbank.org
+
+Download approach:
+  - Download country-level projected monthly means for T2M and PRECTOT
+  - Variables: tas (near-surface air temperature), pr (precipitation)
+  - Scenarios: SSP1-2.6, SSP2-4.5, SSP5-8.5
+  - Period: 2020-2050
+  - Format: CSV
+License: Free for research and non-commercial use
+
+Source 4: GBIF (Global Biodiversity Information Facility)
+What it provides:
+Occurrence records for disease vectors — actual observations of Aedes aegypti, Anopheles species, Ixodes ticks, Phlebotomus sandflies — recorded by researchers and citizens worldwide.
+
+Coverage: Global, point observations
+
+Access method:
+
+text
+
+API: https://api.gbif.org/v1/occurrence/search
+Example:
+  GET /occurrence/search?taxonKey=1652050&hasCoordinate=true
+  (taxonKey for Aedes aegypti)
+
+Or download bulk: Download occurrence CSV for each species
+Species and their taxon keys:
+  Aedes aegypti:       1652050
+  Anopheles gambiae:   1652061  
+  Ixodes ricinus:      5874905
+  Phlebotomus papatasi: 4394685
+How this is used:
+GBIF occurrence data provides validation — we can show users where vectors have actually been observed, overlaid on our suitability model. "Your model predicts X, and here are real observations that confirm it."
+
+License: CC BY 4.0
+
+Source 5: WorldPop
+What it provides:
+Population counts by country and year, 2000-2020, with future projections.
+
+Coverage: Global, country-level
+
+Access method:
+Direct CSV download from WorldPop Hub.
+
+How this is used:
+Calculate "population at risk" — multiply suitability score by population living in suitable areas to get the number of people exposed.
+
+License: CC BY 4.0
+
+Source 6: World Bank Health Indicators
+What it provides:
+Hospital beds per 1,000 people, physicians per 1,000 people, health expenditure per capita, for all countries from 2000 to present.
+
+Access method:
+
+text
+
+API: https://api.worldbank.org/v2/country/all/indicator/
+Key indicators:
+  SH.MED.BEDS.ZS  — Hospital beds per 1,000
+  SH.MED.PHYS.ZS  — Physicians per 1,000
+  SH.XPD.CHEX.PC.CD — Current health expenditure per capita
+  
+Format: ?format=json&per_page=500&date=2000:2023
+License: CC BY 4.0
+
+Source 7: Global Health Security Index (GHSI)
+What it provides:
+Country-level epidemic preparedness scores, measuring: prevention, detection, response, health system, international norms, risk environment.
+
+Coverage: 195 countries
+
+Access method:
+Download the full dataset from ghsindex.org — available as Excel/CSV, free.
+
+License: Free for research
+
+Source 8: Natural Earth
+What it provides:
+Country boundary GeoJSON/Shapefile for the world map. Administrative level 0 and 1 boundaries.
+
+Access method:
+Direct download from naturalearthdata.com
+
+110m scale (for world-level zoom)
+50m scale (for regional zoom)
+10m scale (for country-level zoom)
+License: Public Domain — no attribution required
+
+9.2 Vector Biology Parameters
+These are not downloaded from an API. They are hardcoded in the application based on published scientific literature. They do not need updating.
+
+JavaScript
+
+// These values come from peer-reviewed papers
+// cited fully in the methodology page
+
+const VECTOR_PARAMETERS = {
+  dengue: {
+    vector: 'Aedes aegypti',
+    paper: 'Brady et al. (2014), PLOS NTD',
+    temperature: {
+      min: 18,          // °C — minimum for survival
+      max: 34,          // °C — maximum for survival  
+      optimal_min: 25,  // °C — optimal range start
+      optimal_max: 30,  // °C — optimal range end
+      winter_min: 10,   // °C — minimum in coldest month (overwintering)
+    },
+    humidity: {
+      min: 60,          // % relative humidity minimum
+    },
+    precipitation: {
+      min_monthly: 50,  // mm — minimum for breeding
+      required_months: 3, // months per year with adequate rainfall
+    },
+    altitude: {
+      max: 2000,        // meters above sea level maximum
+    }
+  },
+  malaria: {
+    vector: 'Anopheles gambiae / A. stephensi',
+    paper: 'Ryan et al. (2020), PLOS Biology',
+    temperature: {
+      min: 16,
+      max: 32,
+      optimal_min: 20,
+      optimal_max: 27,
+      winter_min: 5,
+    },
+    humidity: { min: 60 },
+    precipitation: { min_monthly: 80, required_months: 4 },
+    altitude: { max: 2500 }
+  },
+  zika: {
+    vector: 'Aedes aegypti / A. albopictus',
+    paper: 'Messina et al. (2016), eLife',
+    // Similar to dengue but slightly wider range
+    temperature: { min: 16, max: 35, optimal_min: 24, optimal_max: 30, winter_min: 10 },
+    humidity: { min: 55 },
+    precipitation: { min_monthly: 50, required_months: 3 },
+    altitude: { max: 2200 }
+  },
+  chikungunya: {
+    vector: 'Aedes albopictus (tiger mosquito)',
+    paper: 'Kraemer et al. (2015), eLife',
+    temperature: { min: 10, max: 36, optimal_min: 22, optimal_max: 28, winter_min: -2 },
+    // Note: A. albopictus is more cold-tolerant than A. aegypti
+    humidity: { min: 50 },
+    precipitation: { min_monthly: 40, required_months: 3 },
+    altitude: { max: 2000 }
+  },
+  lyme: {
+    vector: 'Ixodes ricinus / I. scapularis',
+    paper: 'Estrada-Pena et al. (2014), Ticks and Tick-borne Diseases',
+    temperature: { min: 7, max: 25, optimal_min: 12, optimal_max: 20, winter_min: -15 },
+    humidity: { min: 85 },
+    precipitation: { min_monthly: 60, required_months: 6 },
+    altitude: { max: 1500 }
+  },
+  leishmaniasis: {
+    vector: 'Phlebotomus papatasi / P. argentipes',
+    paper: 'Gonzalez et al. (2010), International Journal of Health Geographics',
+    temperature: { min: 15, max: 38, optimal_min: 25, optimal_max: 32, winter_min: 5 },
+    humidity: { min: 40 },
+    precipitation: { min_monthly: 20, required_months: 2 },
+    altitude: { max: 1700 }
+  }
+}
+9.3 Suitability Score Calculation Algorithm
+This is the core logic of VectorShift. It must be fully specified before building.
+
+text
+
+SUITABILITY SCORE ALGORITHM
+────────────────────────────
+
+Input:
+  - country_climate: { T2M_mean, T2M_min_coldest, RH2M_mean, PREC_annual, 
+                       suitable_months, altitude_median }
+  - disease_parameters: (from VECTOR_PARAMETERS above)
+
+Output:
+  - suitability_score: 0.0 to 1.0
+
+Steps:
+
+STEP 1 — Temperature Score (weight: 0.35)
+  IF T2M_mean < param.temperature.min OR T2M_mean > param.temperature.max:
+    temp_score = 0
+  ELIF T2M_mean >= param.temperature.optimal_min AND T2M_mean <= param.temperature.optimal_max:
+    temp_score = 1.0
+  ELSE:
+    temp_score = linear interpolation toward 0 from optimal to min/max boundary
+
+STEP 2 — Winter Survival Score (weight: 0.25)
+  IF T2M_min_coldest < param.temperature.winter_min:
+    winter_score = 0  ← Vector cannot overwinter, cannot establish
+  ELIF T2M_min_coldest > param.temperature.winter_min + 5:
+    winter_score = 1.0
+  ELSE:
+    winter_score = linear interpolation
+
+STEP 3 — Humidity Score (weight: 0.20)
+  IF RH2M_mean < param.humidity.min:
+    humidity_score = 0
+  ELIF RH2M_mean > param.humidity.min + 20:
+    humidity_score = 1.0
+  ELSE:
+    humidity_score = linear interpolation
+
+STEP 4 — Rainfall/Breeding Score (weight: 0.15)
+  suitable_months = count of months where PREC >= param.precipitation.min_monthly
+  IF suitable_months < param.precipitation.required_months:
+    rain_score = 0
+  ELSE:
+    rain_score = min(1.0, suitable_months / (param.precipitation.required_months * 1.5))
+
+STEP 5 — Altitude Score (weight: 0.05)
+  IF altitude_median > param.altitude.max:
+    altitude_score = 0
+  ELIF altitude_median > param.altitude.max * 0.8:
+    altitude_score = 0.5
+  ELSE:
+    altitude_score = 1.0
+
+FINAL SCORE:
+  suitability_score = (temp_score × 0.35) + 
+                      (winter_score × 0.25) + 
+                      (humidity_score × 0.20) + 
+                      (rain_score × 0.15) + 
+                      (altitude_score × 0.05)
+
+  ← Result is 0.0 to 1.0
+
+VULNERABILITY INDEX:
+  vulnerability = (suitability_score × 0.40) +
+                  ((1 - health_system_score) × 0.35) +
+                  (population_exposure_score × 0.15) +
+                  (trend_direction_score × 0.10)
+Section 10: Database Schema
+10.1 Complete Schema
+SQL
+
+-- ============================================
+-- VECTORSHIFT DATABASE SCHEMA
+-- PostgreSQL with PostGIS extension
+-- Hosted on Supabase (free tier)
+-- ============================================
+
+-- Enable extensions
+CREATE EXTENSION IF NOT EXISTS "postgis";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ============================================
+-- TABLE: countries
+-- Master reference for all countries
+-- ============================================
+CREATE TABLE countries (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  iso2            CHAR(2) NOT NULL UNIQUE,    -- 'EG'
+  iso3            CHAR(3) NOT NULL UNIQUE,    -- 'EGY'
+  name            VARCHAR(100) NOT NULL,       -- 'Egypt'
+  name_short      VARCHAR(60),                 -- 'Egypt'
+  slug            VARCHAR(100) NOT NULL UNIQUE, -- 'egypt'
+  region          VARCHAR(60),                 -- 'Middle East & North Africa'
+  subregion       VARCHAR(60),                 -- 'Northern Africa'
+  who_region      VARCHAR(60),                 -- 'EMRO'
+  continent       VARCHAR(40),                 -- 'Africa'
+  capital         VARCHAR(100),
+  latitude        DECIMAL(8,5),               -- Country centroid
+  longitude       DECIMAL(8,5),
+  altitude_median DECIMAL(8,2),               -- Median elevation in meters
+  area_km2        DECIMAL(12,2),
+  geojson         JSONB,                       -- Simplified GeoJSON for map
+  flag_emoji      VARCHAR(10),                 -- '🇪🇬'
+  created_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_countries_iso3 ON countries(iso3);
+CREATE INDEX idx_countries_slug ON countries(slug);
+CREATE INDEX idx_countries_region ON countries(region);
+
+-- ============================================
+-- TABLE: diseases
+-- Reference table for the 6 diseases
+-- ============================================
+CREATE TABLE diseases (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  slug            VARCHAR(60) NOT NULL UNIQUE, -- 'dengue'
+  name            VARCHAR(100) NOT NULL,        -- 'Dengue Fever'
+  vector_name     VARCHAR(100),                 -- 'Aedes aegypti'
+  vector_type     VARCHAR(40),                  -- 'mosquito' | 'tick' | 'sandfly'
+  color_hex       VARCHAR(7),                   -- '#F5A623' (for UI)
+  icon_name       VARCHAR(60),                  -- 'mosquito-dengue' (SVG ref)
+  description     TEXT,
+  global_at_risk  BIGINT,                       -- Approximate population at risk
+  source_paper    TEXT,                         -- Citation for parameters
+  sort_order      SMALLINT,
+  is_active       BOOLEAN DEFAULT true,
+  created_at      TIMESTAMP DEFAULT NOW()
+);
+
+-- Seed data:
+-- dengue, malaria, zika, chikungunya, lyme, leishmaniasis
+
+-- ============================================
+-- TABLE: climate_data
+-- Historical climate values per country per year
+-- Source: NASA POWER (monthly → annual aggregation)
+-- ============================================
+CREATE TABLE climate_data (
+  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  country_id            UUID NOT NULL REFERENCES countries(id) ON DELETE CASCADE,
+  year                  SMALLINT NOT NULL,          -- 1981 to 2023
+  
+  -- Temperature (°C)
+  temp_mean_annual      DECIMAL(5,2),              -- Annual mean temperature
+  temp_mean_warmest     DECIMAL(5,2),              -- Mean of warmest month
+  temp_mean_coldest     DECIMAL(5,2),              -- Mean of coldest month (key for overwintering)
+  temp_min_coldest      DECIMAL(5,2),              -- Minimum temp in coldest month
+  
+  -- Humidity (%)
+  humidity_mean         DECIMAL(5,2),              -- Annual mean relative humidity
+  humidity_min          DECIMAL(5,2),              -- Mean humidity in driest month
+  
+  -- Precipitation (mm)
+  precip_annual_total   DECIMAL(8,2),              -- Annual total precipitation
+  precip_monthly_jan    DECIMAL(7,2),              -- Monthly values for breeding calc
+  precip_monthly_feb    DECIMAL(7,2),
+  precip_monthly_mar    DECIMAL(7,2),
+  precip_monthly_apr    DECIMAL(7,2),
+  precip_monthly_may    DECIMAL(7,2),
+  precip_monthly_jun    DECIMAL(7,2),
+  precip_monthly_jul    DECIMAL(7,2),
+  precip_monthly_aug    DECIMAL(7,2),
+  precip_monthly_sep    DECIMAL(7,2),
+  precip_monthly_oct    DECIMAL(7,2),
+  precip_monthly_nov    DECIMAL(7,2),
+  precip_monthly_dec    DECIMAL(7,2),
+  
+  -- Derived values (calculated during ETL)
+  suitable_months_dengue      SMALLINT,            -- Months with suitable precip for each vector
+  suitable_months_malaria     SMALLINT,
+  suitable_months_zika        SMALLINT,
+  suitable_months_chikungunya SMALLINT,
+  suitable_months_lyme        SMALLINT,
+  suitable_months_leish       SMALLINT,
+  
+  data_quality      DECIMAL(3,2),                  -- 0.0-1.0, completeness/reliability
+  data_source       VARCHAR(40) DEFAULT 'NASA_POWER',
+  
+  created_at        TIMESTAMP DEFAULT NOW(),
+  
+  UNIQUE(country_id, year)
+);
+
+CREATE INDEX idx_climate_country_year ON climate_data(country_id, year);
+CREATE INDEX idx_climate_year ON climate_data(year);
+
+-- ============================================
+-- TABLE: climate_projections
+-- Future climate projections per country
+-- Source: World Bank Climate Portal (CMIP6)
+-- ============================================
+CREATE TABLE climate_projections (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  country_id        UUID NOT NULL REFERENCES countries(id) ON DELETE CASCADE,
+  year              SMALLINT NOT NULL,             -- 2024 to 2050
+  scenario          VARCHAR(20) NOT NULL,           -- 'SSP1-2.6' | 'SSP2-4.5' | 'SSP5-8.5'
+  
+  temp_mean_annual  DECIMAL(5,2),
+  temp_mean_coldest DECIMAL(5,2),
+  temp_min_coldest  DECIMAL(5,2),
+  precip_annual_total DECIMAL(8,2),
+  humidity_mean     DECIMAL(5,2),                  -- Derived from temperature + precip
+  
+  -- Uncertainty range (from CMIP6 model ensemble)
+  temp_uncertainty_low    DECIMAL(5,2),
+  temp_uncertainty_high   DECIMAL(5,2),
+  precip_uncertainty_low  DECIMAL(8,2),
+  precip_uncertainty_high DECIMAL(8,2),
+  
+  data_source       VARCHAR(40) DEFAULT 'CMIP6_WB',
+  
+  created_at        TIMESTAMP DEFAULT NOW(),
+  
+  UNIQUE(country_id, year, scenario)
+);
+
+CREATE INDEX idx_projections_country_year_scenario 
+  ON climate_projections(country_id, year, scenario);
+
+-- ============================================
+-- TABLE: suitability_scores
+-- Pre-calculated suitability scores
+-- (historical 1981-2023 + projected 2024-2050)
+-- ============================================
+CREATE TABLE suitability_scores (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  country_id        UUID NOT NULL REFERENCES countries(id) ON DELETE CASCADE,
+  disease_id        UUID NOT NULL REFERENCES diseases(id) ON DELETE CASCADE,
+  year              SMALLINT NOT NULL,             -- 1981 to 2050
+  scenario          VARCHAR(20),                   -- NULL for historical, 'SSP1-2.6' etc for future
+  
+  -- Score components (0.0 to 1.0 each)
+  temp_score        DECIMAL(4,3) NOT NULL,
+  winter_score      DECIMAL(4,3) NOT NULL,
+  humidity_score    DECIMAL(4,3) NOT NULL,
+  rain_score        DECIMAL(4,3) NOT NULL,
+  altitude_score    DECIMAL(4,3) NOT NULL,
+  
+  -- Final composite score
+  suitability_score DECIMAL(4,3) NOT NULL,         -- 0.000 to 1.000
+  
+  -- Risk classification
+  risk_level        VARCHAR(20),                   -- 'none'|'low'|'moderate'|'high'|'critical'
+  
+  -- Year-over-year change
+  score_change_1yr  DECIMAL(5,3),                  -- vs previous year
+  score_change_5yr  DECIMAL(5,3),                  -- vs 5 years ago
+  score_change_since_2000 DECIMAL(5,3),             -- vs year 2000
+  
+  is_newly_at_risk  BOOLEAN DEFAULT false,         -- Crossed threshold in last 5 years
+  
+  calculated_at     TIMESTAMP DEFAULT NOW(),
+  
+  UNIQUE(country_id, disease_id, year, scenario)
+);
+
+CREATE INDEX idx_scores_country_disease_year 
+  ON suitability_scores(country_id, disease_id, year, scenario);
+CREATE INDEX idx_scores_risk_level ON suitability_scores(risk_level);
+CREATE INDEX idx_scores_newly_at_risk ON suitability_scores(is_newly_at_risk) 
+  WHERE is_newly_at_risk = true;
+
+-- ============================================
+-- TABLE: disease_incidence
+-- Actual reported disease cases
+-- Source: WHO GHO
+-- ============================================
+CREATE TABLE disease_incidence (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  country_id        UUID NOT NULL REFERENCES countries(id) ON DELETE CASCADE,
+  disease_id        UUID NOT NULL REFERENCES diseases(id) ON DELETE CASCADE,
+  year              SMALLINT NOT NULL,
+  
+  cases_reported    INTEGER,
+  cases_per_100k    DECIMAL(8,2),
+  deaths            INTEGER,
+  deaths_per_100k   DECIMAL(8,2),
+  
+  data_completeness VARCHAR(20),    -- 'complete'|'partial'|'estimated'
+  data_source       VARCHAR(60) DEFAULT 'WHO_GHO',
+  source_note       TEXT,
+  
+  created_at        TIMESTAMP DEFAULT NOW(),
+  
+  UNIQUE(country_id, disease_id, year)
+);
+
+CREATE INDEX idx_incidence_country_disease 
+  ON disease_incidence(country_id, disease_id);
+
+-- ============================================
+-- TABLE: health_system_indicators
+-- Country health system capacity
+-- Source: World Bank + GHSI
+-- ============================================
+CREATE TABLE health_system_indicators (
+  id                      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  country_id              UUID NOT NULL REFERENCES countries(id) ON DELETE CASCADE,
+  year                    SMALLINT NOT NULL,
+  
+  hospital_beds_per_1000  DECIMAL(6,3),
+  physicians_per_1000     DECIMAL(6,3),
+  nurses_per_1000         DECIMAL(6,3),
+  health_expenditure_pct_gdp DECIMAL(5,2),
+  health_expenditure_per_capita DECIMAL(10,2),
+  
+  -- From Global Health Security Index
+  ghsi_overall_score      DECIMAL(5,2),            -- 0-100
+  ghsi_prevent            DECIMAL(5,2),
+  ghsi_detect             DECIMAL(5,2),
+  ghsi_respond            DECIMAL(5,2),
+  
+  -- Derived composite score (0-10, higher = stronger system)
+  health_system_score     DECIMAL(4,2),
+  
+  data_source             VARCHAR(60),
+  created_at              TIMESTAMP DEFAULT NOW(),
+  
+  UNIQUE(country_id, year)
+);
+
+-- ============================================
+-- TABLE: population_data
+-- Country population by year
+-- Source: WorldPop / World Bank
+-- ============================================
+CREATE TABLE population_data (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  country_id        UUID NOT NULL REFERENCES countries(id) ON DELETE CASCADE,
+  year              SMALLINT NOT NULL,
+  
+  total_population  BIGINT,
+  urban_population  BIGINT,
+  urban_pct         DECIMAL(5,2),
+  
+  data_source       VARCHAR(40),
+  created_at        TIMESTAMP DEFAULT NOW(),
+  
+  UNIQUE(country_id, year)
+);
+
+-- ============================================
+-- TABLE: vulnerability_index
+-- Pre-calculated vulnerability scores
+-- Combines suitability + health system + population
+-- ============================================
+CREATE TABLE vulnerability_index (
+  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  country_id            UUID NOT NULL REFERENCES countries(id) ON DELETE CASCADE,
+  disease_id            UUID NOT NULL REFERENCES diseases(id) ON DELETE CASCADE,
+  year                  SMALLINT NOT NULL,
+  scenario              VARCHAR(20),
+  
+  suitability_component DECIMAL(4,3),   -- Weighted suitability (×0.40)
+  health_component      DECIMAL(4,3),   -- Health weakness (×0.35)
+  population_component  DECIMAL(4,3),   -- Pop exposure (×0.15)
+  trend_component       DECIMAL(4,3),   -- Risk direction (×0.10)
+  
+  vulnerability_score   DECIMAL(4,2),   -- 0.00 to 10.00
+  vulnerability_level   VARCHAR(20),    -- 'low'|'moderate'|'high'|'critical'
+  
+  calculated_at         TIMESTAMP DEFAULT NOW(),
+  
+  UNIQUE(country_id, disease_id, year, scenario)
+);
+
+-- ============================================
+-- TABLE: vector_occurrences
+-- Actual observed vector records
+-- Source: GBIF
+-- ============================================
+CREATE TABLE vector_occurrences (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  disease_id    UUID NOT NULL REFERENCES diseases(id) ON DELETE CASCADE,
+  country_id    UUID REFERENCES countries(id),
+  
+  latitude      DECIMAL(9,6),
+  longitude     DECIMAL(9,6),
+  observed_year SMALLINT,
+  observed_date DATE,
+  
+  gbif_id       BIGINT,
+  taxon_name    VARCHAR(100),
+  
+  created_at    TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_occurrences_disease ON vector_occurrences(disease_id);
+CREATE INDEX idx_occurrences_country ON vector_occurrences(country_id);
+
+-- ============================================
+-- TABLE: global_stats_cache
+-- Pre-calculated global statistics for trends page
+-- Refreshed by background job when data updates
+-- ============================================
+CREATE TABLE global_stats_cache (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  disease_id  UUID NOT NULL REFERENCES diseases(id),
+  year        SMALLINT NOT NULL,
+  scenario    VARCHAR(20),
+  
+  -- Global aggregates
+  countries_high_risk       SMALLINT,
+  countries_moderate_risk   SMALLINT,
+  countries_newly_at_risk   SMALLINT,
+  total_population_at_risk  BIGINT,
+  avg_global_suitability    DECIMAL(4,3),
+  
+  -- Regional breakdown (stored as JSON for flexibility)
+  by_region                 JSONB,
+  
+  calculated_at             TIMESTAMP DEFAULT NOW(),
+  
+  UNIQUE(disease_id, year, scenario)
+);
+
+-- ============================================
+-- TABLE: ai_conversation_logs
+-- Optional: log AI queries for improvement
+-- (No personal data stored)
+-- ============================================
+CREATE TABLE ai_conversation_logs (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id    VARCHAR(40),           -- Anonymous session
+  query_hash    VARCHAR(64),           -- Hash of question (not raw text)
+  disease_slug  VARCHAR(40),
+  country_iso3  CHAR(3),
+  query_type    VARCHAR(40),           -- 'comparison'|'trend'|'risk'|'general'
+  response_ms   INTEGER,               -- Response time in milliseconds
+  created_at    TIMESTAMP DEFAULT NOW()
+);
+
+-- ============================================
+-- TABLE: data_freshness
+-- Tracks when each data source was last updated
+-- ============================================
+CREATE TABLE data_freshness (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  source_name     VARCHAR(60) NOT NULL UNIQUE,
+  last_updated    TIMESTAMP,
+  next_update     TIMESTAMP,
+  record_count    INTEGER,
+  status          VARCHAR(20),        -- 'current'|'stale'|'error'
+  notes           TEXT
+);
+10.2 Table Relationships Diagram
+text
+
+countries
+   │
+   ├──── climate_data (one country → many years)
+   ├──── climate_projections (one country → many year+scenario)
+   ├──── health_system_indicators (one country → many years)
+   ├──── population_data (one country → many years)
+   ├──── vector_occurrences (one country → many observations)
+   │
+   ├──── suitability_scores ←──── diseases
+   │         (country × disease × year × scenario)
+   │
+   ├──── vulnerability_index ←──── diseases
+   │         (country × disease × year × scenario)
+   │
+   └──── disease_incidence ←──── diseases
+             (country × disease × year)
+10.3 Data Validation Rules
+text
+
+VALIDATION RULES
+────────────────
+
+countries:
+  - iso2: exactly 2 uppercase letters
+  - iso3: exactly 3 uppercase letters
+  - slug: lowercase, hyphens only, no spaces
+  - latitude: -90 to 90
+  - longitude: -180 to 180
+
+climate_data:
+  - year: 1981 to current year
+  - temp_mean_annual: -60 to 60 (°C)
+  - humidity_mean: 0 to 100 (%)
+  - precip values: 0 to 5000 (mm)
+  - suitable_months_*: 0 to 12
+
+suitability_scores:
+  - all component scores: 0.000 to 1.000
+  - suitability_score: 0.000 to 1.000
+  - scenario: must be NULL (historical) or one of the valid SSP values
+  - risk_level: must be one of defined enum values
+
+disease_incidence:
+  - cases_reported: >= 0
+  - cases_per_100k: >= 0
+  - deaths cannot exceed cases_reported
+
+REFERENTIAL INTEGRITY:
+  - All foreign keys enforced
+  - Delete cascade on country deletion
+  - No orphaned records allowed
+10.4 Caching Strategy
+text
+
+CACHING LAYERS
+──────────────
+
+Layer 1: Database Query Cache (Supabase built-in)
+  - Automatic for repeated identical queries
+  - No configuration needed
+
+Layer 2: Application Cache (Next.js)
+  - Static generation for country profiles (revalidate: 86400 — once per day)
+  - ISR (Incremental Static Regeneration) for country pages
+  - Implemented with: export const revalidate = 86400
+
+Layer 3: API Response Cache (Vercel Edge Cache)
+  - Cache-Control: s-maxage=3600, stale-while-revalidate=86400
+  - Map data endpoint: cache 1 hour (data changes rarely)
+  - Country profile endpoint: cache 24 hours
+  - Global trends: cache 24 hours
+  - AI responses: NO cache (unique per query)
+
+Layer 4: Browser Cache
+  - GeoJSON country boundaries: Cache 7 days (rarely changes)
+  - Static assets: Cache 1 year (content-hashed)
+  - API responses: Cache 15 minutes with stale-while-revalidate
+
+WHAT TO PRE-CALCULATE (not calculate on request):
+  - All suitability scores: calculated once during ETL, stored in DB
+  - Vulnerability index: calculated once during ETL, stored in DB
+  - Global stats: calculated once per data update, stored in global_stats_cache
+  - Risk classifications: calculated during ETL, stored as string
+
+WHAT TO CALCULATE ON REQUEST:
+  - Comparison between two countries (simple JOIN query, fast)
+  - AI assistant responses (inherently dynamic)
+  - Custom date range queries in data explorer

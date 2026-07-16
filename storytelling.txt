@@ -1,0 +1,290 @@
+✅ YES — Use It On The Landing Page
+The landing page is where you convince someone in 10 seconds that VectorShift matters. A scrollytelling section here would be extremely powerful and directly relevant to your data.
+
+Here is why it works for VectorShift specifically:
+
+The core story of VectorShift is:
+
+Climate is changing → Temperatures are rising → Mosquitoes are moving → New regions are now at risk
+
+This is a sequential cause-and-effect story. That is exactly what scrollytelling is designed to tell.
+
+❌ NO — Do Not Use It On Explorer, Country Profiles, or Data Pages
+Those pages are tools, not stories. A researcher does not want animations while they are working. An animation on the data explorer would be annoying, not impressive.
+
+Rule: Scrollytelling belongs on the marketing/explanation layer. The product itself should be fast, clean, and professional.
+
+What Exactly Should You Build?
+I will describe the scrollytelling section for your landing page in complete detail.
+
+The Scrollytelling Section — "Watch The Shift Happen"
+This section sits between the Hero and the How It Works section on the landing page.
+
+Structure
+text
+
+User scrolls into this section
+→ Screen locks (sticky positioning)
+→ Left side: Narrative text that changes as user scrolls
+→ Right side: Map that animates in sync with the text
+→ User scrolls through 5 "chapters"
+→ Screen unlocks and normal page continues
+The Five Chapters
+Chapter 1 — The World in 1990
+
+text
+
+LEFT TEXT:
+────────────────────────────────
+In 1990, dengue fever was largely 
+confined to tropical regions — 
+Southeast Asia, parts of Africa, 
+the Caribbean.
+
+Most of Europe, North America, 
+and the Middle East had never 
+recorded a locally transmitted case.
+
+RIGHT MAP:
+────────────────────────────────
+World map appears.
+Colors are mostly dark — low risk globally.
+Only South/Southeast Asia and 
+Central America show amber/red.
+Year label: "1990"
+Chapter 2 — The Temperature Rises
+
+text
+
+LEFT TEXT:
+────────────────────────────────
+Between 1990 and 2010, global 
+average temperatures rose 0.4°C.
+
+That fraction of a degree was 
+enough to push dozens of regions 
+across the survival threshold for 
+the dengue mosquito.
+
+RIGHT MAP:
+────────────────────────────────
+Map stays. An overlay appears
+showing temperature increase as
+a warm gradient spreading from 
+the equator outward.
+Animated: Color slowly bleeds into 
+southern Europe, Middle East, 
+eastern US.
+Chapter 3 — The Boundary Moves
+
+text
+
+LEFT TEXT:
+────────────────────────────────
+By 2015, the geographic range 
+of Aedes aegypti — the mosquito 
+that carries dengue, Zika, and 
+chikungunya — had expanded 
+significantly northward.
+
+Countries that had never needed 
+mosquito control programs 
+suddenly did.
+
+RIGHT MAP:
+────────────────────────────────
+Temperature overlay fades.
+Risk suitability colors animate in.
+Watch Mediterranean Europe, 
+Turkey, Iran turn from dark to amber.
+Year counter ticks: 1990 → 2000 → 2015
+Subtle country highlights flash as 
+they cross the risk threshold.
+Chapter 4 — The First Outbreaks
+
+text
+
+LEFT TEXT:
+────────────────────────────────
+The predictions became reality.
+
+2022 — France records its first 
+locally transmitted dengue cases.
+
+2023 — Italy, Spain, Croatia 
+all report local dengue outbreaks.
+
+2023 — Malaria reappears in 
+the United States for the first 
+time in 20 years.
+
+RIGHT MAP:
+────────────────────────────────
+Small pulse animations appear 
+on specific countries as each 
+outbreak is mentioned.
+Like a heartbeat ping on the map.
+France pulses. Italy pulses. 
+Spain pulses. Florida pulses.
+Chapter 5 — The Question
+
+text
+
+LEFT TEXT:
+────────────────────────────────
+This is not the end of the story.
+
+Under current warming trajectories, 
+2.1 billion more people will live 
+in dengue-suitable climates by 2050.
+
+The data already tells us where.
+The question is whether we look.
+
+[Explore the Map →]  ← CTA button
+
+RIGHT MAP:
+────────────────────────────────
+Map jumps to 2050 projection.
+Large portions of Europe, 
+Central Asia, and North America 
+turn orange/red.
+Quiet, impactful.
+No animation needed here.
+Just the image of the 2050 world.
+Is This Hard to Build?
+No. This is one of the easiest impressive things you can build in Next.js.
+
+You do not need video files. You do not need a video player. The "animation" is just your map and some text changing as the user scrolls.
+
+The Technical Approach — Simple and Free
+text
+
+What you need:
+→ CSS sticky positioning (built into every browser, no library)
+→ Intersection Observer API (built into every browser, no library)
+→ Framer Motion (already in your stack)
+→ Your existing map component (already built)
+
+What you do NOT need:
+→ Video files
+→ Video hosting
+→ A special library for scrollytelling
+→ Complex state management
+How It Works Technically
+text
+
+1. The section has a fixed height (e.g., 500vh — five screens tall)
+
+2. The map container is position: sticky — it stays on screen 
+   while the user scrolls through the tall section
+
+3. Intersection Observer watches five invisible "trigger" divs 
+   — one for each chapter
+
+4. When a trigger enters the viewport, it fires an event 
+   that updates which chapter is active
+
+5. The active chapter number controls:
+   → Which text block is visible (fade transition)
+   → Which year the map shows
+   → Which overlay is active
+   → Whether country pulses are playing
+
+6. When the user scrolls past all five chapters, 
+   the sticky lock releases and normal page scroll resumes
+Approximate Code Structure
+text
+
+ScrollytellingSection/
+├── ScrollytellingSection.tsx   ← Main container (sticky logic)
+├── ChapterText.tsx             ← Left side text blocks
+├── ChapterMap.tsx              ← Right side mini map (simplified version)
+├── chapters.ts                 ← Data: text, year, map state per chapter
+└── useScrollChapter.ts         ← Hook: tracks which chapter is active
+This is maybe 3-4 days of focused work after your map is already built. Not weeks. Not a separate project.
+
+Video vs. No Video
+You mentioned videos. Let me address this directly.
+
+Option A: Real Video (Not Recommended for MVP)
+Some sites like Apple use actual pre-rendered video files where the video plays in sync with scroll position.
+
+Why you should NOT do this:
+
+You need to create the video (screen recording, editing, exporting)
+Video files are large (50-200MB) — terrible for performance
+Videos need hosting (costs money or uses large storage quota)
+On slow connections the video buffers and breaks the effect
+Hard to keep in sync with scroll position precisely
+The free Supabase storage limit is 1GB — video would eat most of it
+Option B: CSS + JavaScript Animation (Recommended)
+This is what VectorShift should do. Everything "animated" is actually:
+
+Your existing Mapbox map changing its displayed year
+CSS opacity transitions between text blocks
+Framer Motion fade animations
+A few SVG pulse animations for outbreak markers
+Why this is better:
+
+Zero extra file size
+Works on any connection speed
+Perfectly smooth on any device
+Easier to build and maintain
+More interactive than video (user controls the scroll pace)
+Looks just as impressive as video when done well
+Examples of sites that do this without video:
+
+The Pudding — all their animations are D3 and CSS
+Our World in Data — chart transitions via JavaScript
+Flourish data stories — all animated with canvas/SVG
+What NOT To Do
+Since you asked about this, let me be very direct about the common mistakes:
+
+Mistake	Why It Hurts You
+Putting scrollytelling on every page	Makes the site feel slow and gimmicky
+Using it to hide thin content	If your data story is weak, animation makes it worse
+Animations that play on loop without user interaction	Distracting and unprofessional
+Scroll-jacking (overriding native scroll)	Feels wrong, users hate it, causes motion sickness
+Long animations with no skip option	Frustrates returning users and researchers
+Making users wait for animation before seeing content	Kills engagement
+Video files over 5MB	Destroys performance scores
+The Sites You Should Study
+Before building this, spend 30 minutes studying these specific examples:
+
+Site	URL	What to Study
+The Pudding — Russell article	pudding.cool/2017/03/film-dialogue	How sticky + scroll chapters work perfectly
+Our World in Data — CO2	ourworldindata.org/co2-emissions	How data maps animate with scroll
+NYT — How the Virus Won	nytimes.com/interactive/2020/us/coronavirus-spread	Map + scroll + text — the exact format for VectorShift
+Mapbox Storytelling template	github.com/mapbox/storytelling	Free template that does exactly what you need. Read the code.
+scrollama.js	github.com/russellgoldenberg/scrollama	The JavaScript library many sites use for this. Free. Simple.
+My Specific Recommendation For You
+Do This
+Add one scrollytelling section to your landing page. Specifically the dengue story from 1990 to 2050 that I described above.
+
+Use the Mapbox Storytelling template as a reference. Mapbox has an official open-source template specifically for scroll-driven map stories. It is free, well-documented, and does exactly what you need.
+
+Study it. Do not copy it. Rebuild it in your style using your design system.
+
+The Result
+When someone arrives at VectorShift and starts scrolling the landing page, they experience:
+
+text
+
+[Hero — bold headline, animated mini-map]
+      ↓ scroll
+[Stats strip — four big numbers count up]
+      ↓ scroll
+[SCROLLYTELLING — the dengue story, 5 chapters, ~2 screen heights]
+      ↓ scroll
+[How it works — three steps]
+      ↓ scroll
+[Disease cards]
+      ↓ scroll
+[CTA to Explorer]
+That scrollytelling section is the moment they go from interested to convinced. It is the emotional core of the landing page.
+
+And when your professor or a competition judge opens VectorShift for the first time, they will scroll through that section and think:
+
+"This is not a student project. This is a real product."
+

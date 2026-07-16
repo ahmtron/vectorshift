@@ -1,0 +1,198 @@
+iso3,iso2,name,slug,region,flag_emoji,centroid_lon,centroid_lat
+AFG,AF,Afghanistan,afghanistan,Asia,🇦🇫,67.71,33.94
+ALB,AL,Albania,albania,Europe,🇦🇱,20.17,41.15
+DZA,DZ,Algeria,algeria,Africa,🇩🇿,1.66,28.03
+AND,AD,Andorra,andorra,Europe,🇦🇩,1.60,42.55
+AGO,AO,Angola,angola,Africa,🇦🇴,17.87,-11.20
+ATG,AG,Antigua and Barbuda,antigua-and-barbuda,Caribbean,🇦🇬,-61.80,17.35
+ARG,AR,Argentina,argentina,South America,🇦🇷,-63.62,-38.42
+ARM,AM,Armenia,armenia,Asia,🇦🇲,45.04,40.07
+ABW,AW,Aruba,aruba,Caribbean,🇦🇼,-69.97,12.52
+AUS,AU,Australia,australia,Oceania,🇦🇺,133.78,-25.27
+AUT,AT,Austria,austria,Europe,🇦🇹,14.55,47.52
+AZE,AZ,Azerbaijan,azerbaijan,Asia,🇦🇿,47.58,40.14
+BHS,BS,Bahamas,bahamas,Caribbean,🇧🇸,-77.40,25.03
+BHR,BH,Bahrain,bahrain,Asia,🇧🇭,50.64,26.07
+BGD,BD,Bangladesh,bangladesh,Asia,🇧🇩,90.36,23.68
+BRB,BB,Barbados,barbados,Caribbean,🇧🇧,-59.54,13.19
+BLR,BY,Belarus,belarus,Europe,🇧🇾,27.95,53.71
+BEL,BE,Belgium,belgium,Europe,🇧🇪,4.47,50.50
+BLZ,BZ,Belize,belize,Central America,🇧🇿,-88.50,17.19
+BEN,BJ,Benin,benin,Africa,🇧🇯,2.32,9.31
+BTN,BT,Bhutan,bhutan,Asia,🇧🇹,90.51,27.51
+BOL,BO,Bolivia,bolivia,South America,🇧🇴,-63.99,-16.29
+BIH,BA,Bosnia and Herzegovina,bosnia-and-herzegovina,Europe,🇧🇦,17.68,43.92
+BWA,BW,Botswana,botswana,Africa,🇧🇼,24.68,-22.33
+BRA,BR,Brazil,brazil,South America,🇧🇷,-51.93,-14.24
+BRN,BN,Brunei,brunei,Asia,🇧🇳,114.73,4.54
+BGR,BG,Bulgaria,bulgaria,Europe,🇧🇬,25.49,42.73
+BFA,BF,Burkina Faso,burkina-faso,Africa,🇧🇫,-1.56,12.24
+BDI,BI,Burundi,burundi,Africa,🇧🇮,29.92,-3.37
+CPV,CV,Cabo Verde,cabo-verde,Africa,🇨🇻,-24.01,16.00
+KHM,KH,Cambodia,cambodia,Asia,🇰🇭,104.99,12.56
+CMR,CM,Cameroon,cameroon,Africa,🇨🇲,12.35,7.37
+CAN,CA,Canada,canada,North America,🇨🇦,-106.35,56.13
+CAF,CF,Central African Republic,central-african-republic,Africa,🇨🇫,20.94,6.61
+TCD,TD,Chad,chad,Africa,🇹🇩,18.73,15.45
+CHL,CL,Chile,chile,South America,🇨🇱,-71.54,-35.68
+CHN,CN,China,china,Asia,🇨🇳,104.20,35.86
+COL,CO,Colombia,colombia,South America,🇨🇴,-74.30,4.57
+COM,KM,Comoros,comoros,Africa,🇰🇲,43.87,-11.88
+COD,CD,Congo (DRC),congo-drc,Africa,🇨🇩,21.76,-4.04
+COG,CG,Congo (Republic),congo-republic,Africa,🇨🇬,15.83,-0.23
+CRI,CR,Costa Rica,costa-rica,Central America,🇨🇷,-83.75,9.75
+CIV,CI,Côte d'Ivoire,cote-d-ivoire,Africa,🇨🇮,-5.55,7.54
+HRV,HR,Croatia,croatia,Europe,🇭🇷,15.20,45.10
+CUB,CU,Cuba,cuba,Caribbean,🇨🇺,-77.78,21.52
+CYP,CY,Cyprus,cyprus,Europe,🇨🇾,33.43,35.13
+CZE,CZ,Czech Republic,czech-republic,Europe,🇨🇿,15.47,49.82
+DNK,DK,Denmark,denmark,Europe,🇩🇰,9.50,56.26
+DJI,DJ,Djibouti,djibouti,Africa,🇩🇯,42.59,11.83
+DMA,DM,Dominica,dominica,Caribbean,🇩🇲,-61.37,15.42
+DOM,DO,Dominican Republic,dominican-republic,Caribbean,🇩🇴,-70.16,18.74
+ECU,EC,Ecuador,ecuador,South America,🇪🇨,-78.18,-1.83
+EGY,EG,Egypt,egypt,Africa,🇪🇬,30.80,26.82
+SLV,SV,El Salvador,el-salvador,Central America,🇸🇻,-88.90,13.79
+GNQ,GQ,Equatorial Guinea,equatorial-guinea,Africa,🇬🇶,10.27,1.65
+ERI,ER,Eritrea,eritrea,Africa,🇪🇷,39.78,15.18
+EST,EE,Estonia,estonia,Europe,🇪🇪,25.01,58.60
+SWZ,SZ,Eswatini,eswatini,Africa,🇸🇿,31.47,-26.52
+ETH,ET,Ethiopia,ethiopia,Africa,🇪🇹,40.49,9.15
+FJI,FJ,Fiji,fiji,Oceania,🇫🇯,179.42,-16.58
+FIN,FI,Finland,finland,Europe,🇫🇮,25.75,61.92
+FRA,FR,France,france,Europe,🇫🇷,2.21,46.23
+GAB,GA,Gabon,gabon,Africa,🇬🇦,11.61,-0.80
+GMB,GM,Gambia,gambia,Africa,🇬🇲,-15.31,13.44
+GEO,GE,Georgia,georgia,Asia,🇬🇪,43.36,42.32
+DEU,DE,Germany,germany,Europe,🇩🇪,10.45,51.17
+GHA,GH,Ghana,ghana,Africa,🇬🇭,-1.02,7.95
+GRC,GR,Greece,greece,Europe,🇬🇷,21.82,39.07
+GRD,GD,Grenada,grenada,Caribbean,🇬🇩,-61.68,12.12
+GTM,GT,Guatemala,guatemala,Central America,🇬🇹,-90.23,15.78
+GIN,GN,Guinea,guinea,Africa,🇬🇳,-9.70,9.95
+GNB,GW,Guinea-Bissau,guinea-bissau,Africa,🇬🇼,-15.18,11.80
+GUY,GY,Guyana,guyana,South America,🇬🇾,-58.93,4.86
+HTI,HT,Haiti,haiti,Caribbean,🇭🇹,-72.29,18.97
+HND,HN,Honduras,honduras,Central America,🇭🇳,-86.24,15.20
+HUN,HU,Hungary,hungary,Europe,🇭🇺,19.50,47.16
+ISL,IS,Iceland,iceland,Europe,🇮🇸,-19.02,64.96
+IND,IN,India,india,Asia,🇮🇳,78.96,20.59
+IDN,ID,Indonesia,indonesia,Asia,🇮🇩,113.92,-0.79
+IRN,IR,Iran,iran,Asia,🇮🇷,53.69,32.43
+IRQ,IQ,Iraq,iraq,Asia,🇮🇶,43.68,33.22
+IRL,IE,Ireland,ireland,Europe,🇮🇪,-8.24,53.14
+ISR,IL,Israel,israel,Asia,🇮🇱,34.85,31.05
+ITA,IT,Italy,italy,Europe,🇮🇹,12.57,41.87
+JAM,JM,Jamaica,jamaica,Caribbean,🇯🇲,-77.30,18.11
+JPN,JP,Japan,japan,Asia,🇯🇵,138.25,36.20
+JOR,JO,Jordan,jordan,Asia,🇯🇴,36.24,30.59
+KAZ,KZ,Kazakhstan,kazakhstan,Asia,🇰🇿,66.92,48.02
+KEN,KE,Kenya,kenya,Africa,🇰🇪,37.91,-0.02
+KIR,KI,Kiribati,kiribati,Oceania,🇰🇮,-157.36,1.87
+PRK,KP,North Korea,north-korea,Asia,🇰🇵,127.51,40.34
+KOR,KR,South Korea,south-korea,Asia,🇰🇷,127.78,35.91
+XKS,XK,Kosovo,kosovo,Europe,🇽🇰,20.90,42.60
+KWT,KW,Kuwait,kuwait,Asia,🇰🇼,47.48,29.31
+KGZ,KG,Kyrgyzstan,kyrgyzstan,Asia,🇰🇬,74.77,41.20
+LAO,LA,Laos,laos,Asia,🇱🇦,102.50,19.86
+LVA,LV,Latvia,latvia,Europe,🇱🇻,24.60,56.88
+LBN,LB,Lebanon,lebanon,Asia,🇱🇧,35.86,33.85
+LSO,LS,Lesotho,lesotho,Africa,🇱🇸,28.23,-29.61
+LBR,LR,Liberia,liberia,Africa,🇱🇷,-9.43,6.43
+LBY,LY,Libya,libya,Africa,🇱🇾,17.23,26.34
+LIE,LI,Liechtenstein,liechtenstein,Europe,🇱🇮,9.56,47.14
+LTU,LT,Lithuania,lithuania,Europe,🇱🇹,23.88,55.17
+LUX,LU,Luxembourg,luxembourg,Europe,🇱🇺,6.13,49.82
+MDG,MG,Madagascar,madagascar,Africa,🇲🇬,46.87,-18.77
+MWI,MW,Malawi,malawi,Africa,🇲🇼,34.30,-13.25
+MYS,MY,Malaysia,malaysia,Asia,🇲🇾,101.98,4.21
+MDV,MV,Maldives,maldives,Asia,🇲🇻,73.22,3.20
+MLI,ML,Mali,mali,Africa,🇲🇱,-3.99,17.57
+MLT,MT,Malta,malta,Europe,🇲🇹,14.38,35.94
+MHL,MH,Marshall Islands,marshall-islands,Oceania,🇲🇭,171.18,7.13
+MRT,MR,Mauritania,mauritania,Africa,🇲🇷,-10.94,21.01
+MUS,MU,Mauritius,mauritius,Africa,🇲🇺,57.55,-20.35
+MEX,MX,Mexico,mexico,North America,🇲🇽,-102.55,23.63
+FSM,FM,Micronesia,micronesia,Oceania,🇫🇲,158.22,7.43
+MDA,MD,Moldova,moldova,Europe,🇲🇩,28.37,47.41
+MCO,MC,Monaco,monaco,Europe,🇲🇨,7.42,43.73
+MNG,MN,Mongolia,mongolia,Asia,🇲🇳,103.85,46.86
+MNE,ME,Montenegro,montenegro,Europe,🇲🇪,19.37,42.71
+MAR,MA,Morocco,morocco,Africa,🇲🇦,-7.09,31.79
+MOZ,MZ,Mozambique,mozambique,Africa,🇲🇿,35.53,-18.67
+MMR,MM,Myanmar,myanmar,Asia,🇲🇲,95.96,21.91
+NAM,NA,Namibia,namibia,Africa,🇳🇦,18.49,-22.96
+NRU,NR,Nauru,nauru,Oceania,🇳🇷,166.92,-0.52
+NPL,NP,Nepal,nepal,Asia,🇳🇵,84.12,28.39
+NLD,NL,Netherlands,netherlands,Europe,🇳🇱,5.29,52.13
+NZL,NZ,New Zealand,new-zealand,Oceania,🇳🇿,174.89,-40.90
+NIC,NI,Nicaragua,nicaragua,Central America,🇳🇮,-85.01,12.87
+NER,NE,Niger,niger,Africa,🇳🇪,2.11,17.61
+NGA,NG,Nigeria,nigeria,Africa,🇳🇬,8.68,9.08
+MKD,MK,North Macedonia,north-macedonia,Europe,🇲🇰,21.75,41.61
+NOR,NO,Norway,norway,Europe,🇳🇴,8.47,60.47
+OMN,OM,Oman,oman,Asia,🇴🇲,55.98,21.47
+PAK,PK,Pakistan,pakistan,Asia,🇵🇰,69.35,30.38
+PLW,PW,Palau,palau,Oceania,🇵🇼,134.58,7.51
+PSE,PS,Palestine,Palestine,Asia,🇵🇸,35.23,31.95
+PAN,PA,Panama,panama,Central America,🇵🇦,-80.78,8.54
+PNG,PG,Papua New Guinea,papua-new-guinea,Oceania,🇵🇬,143.96,-6.31
+PRY,PY,Paraguay,paraguay,South America,🇵🇾,-58.44,-23.52
+PER,PE,Peru,peru,South America,🇵🇪,-75.02,-9.19
+PHL,PH,Philippines,philippines,Asia,🇵🇭,121.77,12.88
+POL,PL,Poland,poland,Europe,🇵🇱,19.15,51.92
+PRT,PT,Portugal,portugal,Europe,🇵🇹,-8.22,39.40
+QAT,QA,Qatar,qatar,Asia,🇶🇦,51.18,25.35
+ROU,RO,Romania,romania,Europe,🇷🇴,24.97,45.94
+RUS,RU,Russia,russia,Europe/Asia,🇷🇺,105.32,61.52
+RWA,RW,Rwanda,rwanda,Africa,🇷🇼,29.97,-1.94
+KNA,KN,Saint Kitts and Nevis,saint-kitts-and-nevis,Caribbean,🇰🇳,-62.78,17.36
+LCA,LC,Saint Lucia,saint-lucia,Caribbean,🇱🇨,-60.97,13.91
+VCT,VC,Saint Vincent and the Grenadines,saint-vincent-and-the-grenadines,Caribbean,🇻🇨,-61.29,12.98
+WSM,WS,Samoa,samoa,Oceania,🇼🇸,-172.20,-13.76
+SMR,SM,San Marino,san-marino,Europe,🇸🇲,12.46,43.94
+STP,ST,Sao Tome and Principe,sao-tome-and-principe,Africa,🇸🇹,6.61,0.19
+SAU,SA,Saudi Arabia,saudi-arabia,Asia,🇸🇦,45.08,23.89
+SEN,SN,Senegal,senegal,Africa,🇸🇳,-14.45,14.50
+SRB,RS,Serbia,serbia,Europe,🇷🇸,21.01,44.02
+SYC,SC,Seychelles,seychelles,Africa,🇸🇨,55.49,-4.68
+SLE,SL,Sierra Leone,sierra-leone,Africa,🇸🇱,-11.78,8.48
+SGP,SG,Singapore,singapore,Asia,🇸🇬,103.82,1.35
+SVK,SK,Slovakia,slovakia,Europe,🇸🇰,19.70,48.67
+SVN,SI,Slovenia,slovenia,Europe,🇸🇮,14.99,46.15
+SLB,SB,Solomon Islands,solomon-islands,Oceania,🇸🇧,160.16,-9.64
+SOM,SO,Somalia,somalia,Africa,🇸🇴,46.20,5.15
+ZAF,ZA,South Africa,south-africa,Africa,🇿🇦,22.94,-30.56
+SSD,SS,South Sudan,south-sudan,Africa,🇸🇸,31.31,6.88
+ESP,ES,Spain,spain,Europe,🇪🇸,-3.75,40.46
+LKA,LK,Sri Lanka,sri-lanka,Asia,🇱🇰,80.77,7.87
+SDN,SD,Sudan,sudan,Africa,🇸🇩,30.22,12.86
+SUR,SR,Suriname,suriname,South America,🇸🇷,-56.03,3.92
+SWE,SE,Sweden,sweden,Europe,🇸🇪,18.64,60.13
+CHE,CH,Switzerland,switzerland,Europe,🇨🇭,8.23,46.82
+SYR,SY,Syria,syria,Asia,🇸🇾,39.00,34.80
+TWN,TW,Taiwan,taiwan,Asia,🇹🇼,121.53,23.70
+TJK,TJ,Tajikistan,tajikistan,Asia,🇹🇯,71.28,38.86
+TZA,TZ,Tanzania,tanzania,Africa,🇹🇿,34.89,-6.37
+THA,TH,Thailand,thailand,Asia,🇹🇭,100.99,15.87
+TLS,TL,Timor-Leste,timor-leste,Asia,🇹🇱,125.73,-8.87
+TGO,TG,Togo,togo,Africa,🇹🇬,0.82,8.62
+TON,TO,Tonga,tonga,Oceania,🇹🇴,-175.20,-21.18
+TTO,TT,Trinidad and Tobago,trinidad-and-tobago,Caribbean,🇹🇹,-61.22,10.69
+TUN,TN,Tunisia,tunisia,Africa,🇹🇳,9.54,33.89
+TUR,TR,Turkey,turkey,Asia/Europe,🇹🇷,35.24,38.96
+TKM,TM,Turkmenistan,turkmenistan,Asia,🇹🇲,59.56,39.38
+TUV,TV,Tuvalu,tuvalu,Oceania,🇹🇻,179.21,-7.11
+UGA,UG,Uganda,uganda,Africa,🇺🇬,32.29,1.37
+UKR,UA,Ukraine,ukraine,Europe,🇺🇦,31.17,48.38
+ARE,AE,United Arab Emirates,united-arab-emirates,Asia,🇦🇪,53.85,23.42
+GBR,GB,United Kingdom,united-kingdom,Europe,🇬🇧,-3.44,55.38
+USA,US,United States,united-states,North America,🇺🇸,-95.71,37.09
+URY,UY,Uruguay,uruguay,South America,🇺🇾,-55.77,-32.52
+UZB,UZ,Uzbekistan,uzbekistan,Asia,🇺🇿,64.59,41.38
+VUT,VU,Vanuatu,vanuatu,Oceania,🇻🇺,166.96,-15.38
+VEN,VE,Venezuela,venezuela,South America,🇻🇪,-66.59,6.42
+VNM,VN,Vietnam,vietnam,Asia,🇻🇳,108.28,14.06
+YEM,YE,Yemen,yemen,Asia,🇾🇪,48.52,15.55
+ZMB,ZM,Zambia,zambia,Africa,🇿🇲,27.85,-13.13
+ZWE,ZW,Zimbabwe,zimbabwe,Africa,🇿🇼,29.15,-19.02

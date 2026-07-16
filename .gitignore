@@ -1,0 +1,9 @@
+node_modules
+.next
+.env*
+!.env.example
+coverage
+etl/raw
+etl/output
+keys.txt 
+keys.txt

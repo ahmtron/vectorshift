@@ -1,0 +1,3521 @@
+TECHNICAL REQUIREMENTS DOCUMENT (TRD)
+VectorShift — Climate-Health Intelligence Platform
+Version 1.0 | Complete Solo Developer Specification
+PART ONE: SYSTEM ARCHITECTURE
+Section 1: Architecture Overview
+1.1 Architecture Philosophy
+VectorShift follows a data-first, pre-computation architecture. The most important architectural decision is this: nothing is calculated at request time that can be calculated in advance.
+
+This means:
+
+All suitability scores are pre-calculated during data ingestion
+All vulnerability indexes are stored, not derived on the fly
+Country profile pages are statically generated at build time
+The map loads pre-aggregated GeoJSON with scores embedded
+This approach delivers:
+
+Sub-100ms page loads for most content
+Zero database load during peak traffic
+Full functionality even if the database is temporarily slow
+No expensive real-time computation on free-tier infrastructure
+1.2 High-Level Architecture Diagram
+text
+
+┌─────────────────────────────────────────────────────────────────┐
+│                        DATA LAYER                                │
+│                                                                   │
+│  NASA POWER API  →  Python ETL Pipeline  →  PostgreSQL (Supabase)│
+│  WHO GHO CSV     →  Score Calculator    →  PostGIS               │
+│  World Bank API  →  Validation Layer    →  Materialized Views    │
+│  CMIP6 Downloads →  ETL Scheduler       →  Storage (GeoJSON)    │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                      BACKEND LAYER                               │
+│                                                                   │
+│  Next.js API Routes (Serverless Functions on Vercel)             │
+│  ├── /api/map           → Scores for all countries (GeoJSON)    │
+│  ├── /api/country/[id]  → Full country profile data             │
+│  ├── /api/compare       → Two-country comparison                 │
+│  ├── /api/trends        → Global aggregate statistics            │
+│  ├── /api/explorer      → Filterable data table                  │
+│  └── /api/assistant     → AI query handler                      │
+│                                                                   │
+│  Supabase Client (direct DB access for simple queries)           │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                      FRONTEND LAYER                              │
+│                                                                   │
+│  Next.js 14 App Router                                           │
+│  ├── Static Pages (ISR): Landing, Country Profiles, Methodology  │
+│  ├── Dynamic Pages: Explorer, Compare, Trends, Assistant         │
+│  ├── Mapbox GL JS: Interactive map rendering                     │
+│  ├── Recharts + D3: Data visualization                           │
+│  └── Framer Motion: Animations                                   │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    DEPLOYMENT LAYER                              │
+│                                                                   │
+│  Vercel (Frontend + API Routes) ← Free tier: 100GB bandwidth    │
+│  Supabase (Database + Storage)  ← Free tier: 500MB DB, 1GB storage│
+│  Cloudflare (DNS + CDN)         ← Free tier                     │
+│  GitHub (Source control + CI)   ← Free                          │
+└─────────────────────────────────────────────────────────────────┘
+1.3 Architecture Decision Records
+These are explicit decisions made and their reasoning:
+
+Decision	Choice Made	Reason	Alternative Rejected
+Framework	Next.js 14 App Router	SSG + ISR + API routes in one framework. Best free hosting on Vercel	Separate Express backend — adds complexity
+Database	Supabase PostgreSQL	Free tier, PostGIS included, real-time subscriptions, auth built-in	PlanetScale — no PostGIS. MongoDB — wrong for relational data
+Map library	Mapbox GL JS	Best performance for choropleth at world scale, free tier sufficient, excellent customization	Leaflet — slower for large GeoJSON. DeckGL — too complex
+Charts	Recharts primary, D3 for complex	Recharts for standard charts (fast), D3 for custom visualizations (powerful)	Chart.js — less control. Victory — less active
+Styling	Tailwind CSS	Utility-first, no runtime CSS, excellent with shadcn	CSS Modules — more verbose. Styled Components — runtime overhead
+Components	shadcn/ui	Unstyled, copy-paste, full control, no lock-in	Chakra UI — too opinionated. MUI — heavy
+AI	Groq API (free tier)	Fastest inference (300+ tokens/sec), generous free tier, no credit card required	OpenAI — paid. Gemini — good alternative
+ETL language	Python	Best data science ecosystem, pandas for data processing, requests for APIs	Node.js — inferior data processing libraries
+Deployment	Vercel	Free tier, automatic deployments, ISR support, edge functions	Netlify — good but Vercel + Next.js is first-party
+State management	Zustand	Lightweight, no boilerplate, perfect for map/filter state	Redux — overkill. Context only — performance issues with map
+Section 2: Technology Stack
+2.1 Complete Stack Specification
+Frontend
+text
+
+Framework:        Next.js 14.2+ (App Router)
+Language:         TypeScript 5.x (strict mode)
+Styling:          Tailwind CSS 3.4+
+Component base:   shadcn/ui (latest)
+Animation:        Framer Motion 11+
+State:            Zustand 4+
+Data fetching:    TanStack Query v5 (React Query)
+Maps:             Mapbox GL JS 3+
+Charts:           Recharts 2.x + D3.js v7
+Tables:           TanStack Table v8
+Forms:            React Hook Form + Zod
+Icons:            Lucide React
+Date handling:    date-fns
+Utilities:        clsx, tailwind-merge, class-variance-authority
+Backend
+text
+
+API layer:        Next.js API Routes (serverless functions)
+Database client:  @supabase/supabase-js v2
+ORM:              None (raw SQL via Supabase client for control)
+Validation:       Zod (shared with frontend)
+AI:               Groq SDK (llama-3.1-70b-versatile model)
+Rate limiting:    Upstash Redis (free tier) via @upstash/ratelimit
+ETL Pipeline (separate Python scripts, run once)
+text
+
+Language:         Python 3.11+
+HTTP client:      httpx (async requests)
+Data processing:  pandas, numpy
+Geospatial:       geopandas, shapely
+DB connection:    psycopg2, python-dotenv
+Scheduling:       GitHub Actions (once/year for data refresh)
+Infrastructure
+text
+
+Hosting:          Vercel (frontend + API)
+Database:         Supabase (PostgreSQL 15 + PostGIS)
+Storage:          Supabase Storage (GeoJSON files)
+CDN:              Vercel Edge Network (automatic)
+DNS:              Cloudflare (free)
+Source control:   GitHub
+CI/CD:            GitHub Actions
+Monitoring:       Vercel Analytics (free) + Sentry (free tier)
+2.2 Version Lock File Requirements
+Create a .nvmrc with Node version 20.x LTS. Pin all dependency versions in package.json using exact versions (remove ^ prefix) before production deployment to prevent breaking changes.
+
+Section 3: Complete File Structure
+text
+
+vectorshift/
+├── .github/
+│   └── workflows/
+│       ├── deploy.yml              ← CI/CD pipeline
+│       ├── etl-annual.yml          ← Annual data refresh (manual trigger)
+│       └── lighthouse.yml          ← Performance testing
+│
+├── etl/                            ← Python data pipeline (run once)
+│   ├── README.md                   ← ETL instructions
+│   ├── requirements.txt
+│   ├── .env.example
+│   ├── config/
+│   │   ├── countries.py            ← ISO codes, slugs, metadata
+│   │   ├── diseases.py             ← Disease parameters (from PRD)
+│   │   └── data_sources.py         ← API endpoints, file paths
+│   ├── collectors/
+│   │   ├── __init__.py
+│   │   ├── nasa_power.py           ← NASA POWER API collector
+│   │   ├── who_gho.py              ← WHO data downloader/parser
+│   │   ├── world_bank.py           ← World Bank API collector
+│   │   ├── cmip6.py                ← CMIP6 projections collector
+│   │   ├── gbif.py                 ← GBIF occurrence downloader
+│   │   └── worldpop.py             ← WorldPop data processor
+│   ├── processors/
+│   │   ├── __init__.py
+│   │   ├── climate_processor.py    ← Aggregate NASA monthly → annual stats
+│   │   ├── score_calculator.py     ← Suitability algorithm implementation
+│   │   ├── vulnerability_calc.py   ← Vulnerability index calculation
+│   │   ├── geojson_builder.py      ← Build optimized GeoJSON with scores
+│   │   └── global_stats.py         ← Calculate global aggregate stats
+│   ├── loaders/
+│   │   ├── __init__.py
+│   │   ├── db_loader.py            ← Load processed data into Supabase
+│   │   └── storage_loader.py       ← Upload GeoJSON to Supabase Storage
+│   ├── validators/
+│   │   ├── __init__.py
+│   │   └── data_validator.py       ← Validate all data before loading
+│   └── main.py                     ← Orchestrator script
+│
+├── public/
+│   ├── favicon.ico
+│   ├── og-image.png                ← 1200×630 Open Graph image
+│   ├── icons/
+│   │   ├── disease-dengue.svg
+│   │   ├── disease-malaria.svg
+│   │   ├── disease-zika.svg
+│   │   ├── disease-chikungunya.svg
+│   │   ├── disease-lyme.svg
+│   │   └── disease-leishmaniasis.svg
+│   └── fonts/                      ← Self-hosted font files
+│       ├── inter-var.woff2
+│       ├── cabinet-grotesk.woff2
+│       └── jetbrains-mono.woff2
+│
+├── src/
+│   ├── app/                        ← Next.js App Router
+│   │   ├── layout.tsx              ← Root layout (fonts, providers, nav)
+│   │   ├── page.tsx                ← Landing page
+│   │   ├── not-found.tsx           ← Custom 404 page
+│   │   ├── error.tsx               ← Global error boundary
+│   │   ├── loading.tsx             ← Global loading state
+│   │   │
+│   │   ├── explorer/
+│   │   │   ├── page.tsx            ← Explorer page (full-screen map)
+│   │   │   ├── loading.tsx
+│   │   │   └── error.tsx
+│   │   │
+│   │   ├── country/
+│   │   │   ├── [slug]/
+│   │   │   │   ├── page.tsx        ← Country profile (ISR)
+│   │   │   │   ├── loading.tsx
+│   │   │   │   └── error.tsx
+│   │   │   └── page.tsx            ← Country index (all countries)
+│   │   │
+│   │   ├── compare/
+│   │   │   ├── page.tsx
+│   │   │   └── loading.tsx
+│   │   │
+│   │   ├── trends/
+│   │   │   ├── page.tsx
+│   │   │   └── loading.tsx
+│   │   │
+│   │   ├── data/
+│   │   │   ├── page.tsx            ← Data Explorer
+│   │   │   └── loading.tsx
+│   │   │
+│   │   ├── assistant/
+│   │   │   └── page.tsx
+│   │   │
+│   │   ├── methodology/
+│   │   │   └── page.tsx            ← Static page (no data needed)
+│   │   │
+│   │   ├── about/
+│   │   │   └── page.tsx
+│   │   │
+│   │   └── api/                    ← API Routes
+│   │       ├── map/
+│   │       │   └── route.ts        ← GET /api/map?disease=&year=&scenario=
+│   │       ├── country/
+│   │       │   └── [slug]/
+│   │       │       └── route.ts    ← GET /api/country/[slug]
+│   │       ├── compare/
+│   │       │   └── route.ts        ← GET /api/compare?a=&b=&disease=
+│   │       ├── trends/
+│   │       │   └── route.ts        ← GET /api/trends?disease=
+│   │       ├── explorer/
+│   │       │   └── route.ts        ← GET /api/explorer?filters...
+│   │       ├── search/
+│   │       │   └── route.ts        ← GET /api/search?q=
+│   │       └── assistant/
+│   │           └── route.ts        ← POST /api/assistant
+│   │
+│   ├── components/
+│   │   ├── ui/                     ← shadcn/ui base components
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── badge.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── drawer.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── select.tsx
+│   │   │   ├── slider.tsx
+│   │   │   ├── skeleton.tsx
+│   │   │   ├── tabs.tsx
+│   │   │   ├── tooltip.tsx
+│   │   │   ├── toast.tsx
+│   │   │   └── separator.tsx
+│   │   │
+│   │   ├── layout/
+│   │   │   ├── Navigation.tsx      ← Top navigation bar
+│   │   │   ├── Footer.tsx
+│   │   │   ├── ThemeProvider.tsx   ← Dark/light mode
+│   │   │   └── PageWrapper.tsx     ← Standard page container
+│   │   │
+│   │   ├── map/
+│   │   │   ├── GlobalMap.tsx       ← Main Mapbox component
+│   │   │   ├── MapLegend.tsx       ← Risk color legend
+│   │   │   ├── CountryLayer.tsx    ← GeoJSON fill layer
+│   │   │   ├── CountryPanel.tsx    ← Slide-in country info panel
+│   │   │   ├── MapControls.tsx     ← Zoom, pan, reset controls
+│   │   │   ├── DiseaseSelector.tsx ← Left panel disease/layer toggles
+│   │   │   ├── TimeSlider.tsx      ← Custom time slider component
+│   │   │   ├── ScenarioToggle.tsx  ← SSP scenario selector
+│   │   │   └── MapSearch.tsx       ← Search bar (flies to country)
+│   │   │
+│   │   ├── charts/
+│   │   │   ├── SuitabilityTrendChart.tsx    ← Line chart over time
+│   │   │   ├── ProjectionChart.tsx          ← Historical + projected
+│   │   │   ├── RiskGauge.tsx                ← Circular gauge for scores
+│   │   │   ├── SparkLine.tsx                ← Mini inline trend line
+│   │   │   ├── BarComparison.tsx            ← Horizontal bar for indicators
+│   │   │   ├── AtRiskAreaChart.tsx          ← Global population at risk
+│   │   │   ├── RegionalBreakdown.tsx        ← WHO region comparison
+│   │   │   └── ScoreBreakdownPie.tsx        ← Vulnerability components
+│   │   │
+│   │   ├── country/
+│   │   │   ├── CountryHeader.tsx            ← Flag, name, region, score
+│   │   │   ├── DiseaseRiskCard.tsx          ← Per-disease risk card
+│   │   │   ├── ClimateDriversPanel.tsx      ← Temperature/humidity/rain
+│   │   │   ├── HealthSystemPanel.tsx        ← Hospital beds, physicians
+│   │   │   ├── VulnerabilityPanel.tsx       ← Vulnerability breakdown
+│   │   │   ├── NeighborCountries.tsx        ← Adjacent country cards
+│   │   │   └── DataSourcesPanel.tsx         ← Citations and sources
+│   │   │
+│   │   ├── compare/
+│   │   │   ├── CountrySelector.tsx          ← Searchable country picker
+│   │   │   ├── ComparisonColumn.tsx         ← One side of comparison
+│   │   │   ├── DifferenceHighlight.tsx      ← Automated insight text
+│   │   │   └── ComparisonChart.tsx          ← Overlaid trend lines
+│   │   │
+│   │   ├── landing/
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── StatsStrip.tsx
+│   │   │   ├── HowItWorks.tsx
+│   │   │   ├── FeaturedInsight.tsx
+│   │   │   ├── DiseaseCards.tsx
+│   │   │   ├── PersonaSection.tsx
+│   │   │   └── MapTeaser.tsx
+│   │   │
+│   │   ├── assistant/
+│   │   │   ├── ChatInterface.tsx
+│   │   │   ├── MessageBubble.tsx
+│   │   │   ├── SuggestedQuestions.tsx
+│   │   │   ├── SourceAttribution.tsx
+│   │   │   └── TypingIndicator.tsx
+│   │   │
+│   │   ├── data-explorer/
+│   │   │   ├── ExplorerFilters.tsx
+│   │   │   ├── DataTable.tsx
+│   │   │   ├── DownloadButton.tsx
+│   │   │   └── DataDictionary.tsx
+│   │   │
+│   │   └── shared/
+│   │       ├── RiskBadge.tsx                ← Color-coded risk level badge
+│   │       ├── TrendIndicator.tsx           ← ↑↓→ with percentage
+│   │       ├── ScoreBar.tsx                 ← Horizontal progress bar
+│   │       ├── DataQualityTag.tsx           ← Data completeness indicator
+│   │       ├── LoadingSpinner.tsx
+│   │       ├── ErrorMessage.tsx
+│   │       ├── EmptyState.tsx
+│   │       └── CountryFlag.tsx
+│   │
+│   ├── hooks/
+│   │   ├── useMapStore.ts          ← Zustand store for map state
+│   │   ├── useExplorerStore.ts     ← Zustand store for data explorer
+│   │   ├── useTheme.ts             ← Dark/light mode management
+│   │   ├── useCountryData.ts       ← React Query hook for country data
+│   │   ├── useMapData.ts           ← React Query hook for map GeoJSON
+│   │   ├── useTrendsData.ts        ← React Query hook for global trends
+│   │   ├── useSearch.ts            ← Debounced country search
+│   │   ├── useTimeSlider.ts        ← Time slider logic and animation
+│   │   └── useMediaQuery.ts        ← Responsive breakpoint detection
+│   │
+│   ├── lib/
+│   │   ├── supabase/
+│   │   │   ├── client.ts           ← Browser Supabase client
+│   │   │   ├── server.ts           ← Server Supabase client
+│   │   │   └── queries.ts          ← All database query functions
+│   │   ├── mapbox/
+│   │   │   ├── config.ts           ← Mapbox style URL, settings
+│   │   │   ├── layers.ts           ← Layer definitions (fill, line, etc)
+│   │   │   ├── colors.ts           ← Risk color interpolation expressions
+│   │   │   └── animations.ts       ← Time slider animation logic
+│   │   ├── ai/
+│   │   │   ├── groq-client.ts      ← Groq API client setup
+│   │   │   ├── system-prompt.ts    ← AI system prompt
+│   │   │   └── context-builder.ts  ← Build DB context for AI queries
+│   │   ├── utils/
+│   │   │   ├── risk-levels.ts      ← Score → label conversion
+│   │   │   ├── formatters.ts       ← Number, date, percent formatters
+│   │   │   ├── country-utils.ts    ← Country lookup helpers
+│   │   │   ├── csv-export.ts       ← CSV generation for data explorer
+│   │   │   └── url-params.ts       ← Share URL parameter handling
+│   │   └── constants/
+│   │       ├── diseases.ts         ← Disease metadata constants
+│   │       ├── scenarios.ts        ← SSP scenario definitions
+│   │       └── regions.ts          ← WHO region definitions
+│   │
+│   ├── types/
+│   │   ├── database.ts             ← Generated Supabase types
+│   │   ├── api.ts                  ← API request/response types
+│   │   ├── map.ts                  ← Map-related types
+│   │   └── ai.ts                   ← AI message types
+│   │
+│   └── styles/
+│       ├── globals.css             ← Tailwind base + CSS variables
+│       └── mapbox-overrides.css    ← Custom Mapbox popup/control styles
+│
+├── .env.local                      ← Local environment variables
+├── .env.example                    ← Template (committed to git)
+├── .gitignore
+├── .nvmrc                          ← Node version 20
+├── next.config.js
+├── tailwind.config.ts
+├── tsconfig.json
+├── postcss.config.js
+├── package.json
+└── README.md
+PART TWO: BACKEND SPECIFICATION
+Section 4: API Architecture
+4.1 API Design Principles
+All API routes are in /src/app/api/ following Next.js App Router conventions
+All responses follow a consistent envelope format
+All errors return consistent error objects
+All routes include proper cache headers
+All routes validate input with Zod before processing
+4.2 Standard Response Envelope
+TypeScript
+
+// Success response
+{
+  "success": true,
+  "data": { ... },
+  "meta": {
+    "cached": true,
+    "data_updated_at": "2024-01-15T00:00:00Z",
+    "query_ms": 45
+  }
+}
+
+// Error response
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_DISEASE",
+    "message": "Disease must be one of: dengue, malaria, zika, chikungunya, lyme, leishmaniasis",
+    "field": "disease"
+  }
+}
+4.3 Complete API Route Specifications
+Route 1: GET /api/map
+Purpose: Returns GeoJSON FeatureCollection for all countries with suitability scores embedded as properties. This is the primary data feed for the Mapbox map.
+
+Parameters:
+
+Parameter	Type	Required	Default	Validation
+disease	string	Yes	—	One of 6 valid disease slugs
+year	integer	Yes	—	1981–2050
+scenario	string	No	null	SSP1-2.6, SSP2-4.5, SSP5-8.5 (required if year > 2023)
+Response Shape:
+
+TypeScript
+
+{
+  success: true,
+  data: {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {
+          iso3: "EGY",
+          iso2: "EG",
+          name: "Egypt",
+          slug: "egypt",
+          score: 0.782,
+          risk_level: "high",
+          is_newly_at_risk: false,
+          score_change_since_2000: 0.134,
+          population: 105914500
+        },
+        geometry: { /* Simplified GeoJSON polygon */ }
+      }
+      // ... 195 countries
+    ]
+  },
+  meta: {
+    disease: "dengue",
+    year: 2024,
+    scenario: null,
+    is_projected: false,
+    data_updated_at: "2024-01-15T00:00:00Z",
+    countries_with_data: 178,
+    countries_no_data: 17
+  }
+}
+Implementation Logic:
+
+TypeScript
+
+// src/app/api/map/route.ts
+
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { VALID_DISEASES, VALID_SCENARIOS } from '@/lib/constants/diseases'
+
+const QuerySchema = z.object({
+  disease: z.enum(VALID_DISEASES),
+  year: z.coerce.number().int().min(1981).max(2050),
+  scenario: z.enum(VALID_SCENARIOS).optional().nullable(),
+})
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  
+  // Validate input
+  const parsed = QuerySchema.safeParse({
+    disease: searchParams.get('disease'),
+    year: searchParams.get('year'),
+    scenario: searchParams.get('scenario'),
+  })
+  
+  if (!parsed.success) {
+    return NextResponse.json(
+      { success: false, error: parsed.error.errors[0] },
+      { status: 400 }
+    )
+  }
+  
+  const { disease, year, scenario } = parsed.data
+  
+  // Enforce scenario requirement for projected years
+  if (year > 2023 && !scenario) {
+    return NextResponse.json(
+      { success: false, error: { code: 'SCENARIO_REQUIRED', 
+        message: 'scenario parameter required for years after 2023' }},
+      { status: 400 }
+    )
+  }
+  
+  const supabase = createServerSupabaseClient()
+  
+  // Single optimized query joining countries + scores + population
+  const { data, error } = await supabase.rpc('get_map_data', {
+    p_disease: disease,
+    p_year: year,
+    p_scenario: scenario ?? null
+  })
+  
+  if (error) {
+    return NextResponse.json(
+      { success: false, error: { code: 'DB_ERROR', message: error.message }},
+      { status: 500 }
+    )
+  }
+  
+  // Transform to GeoJSON FeatureCollection
+  const geojson = buildFeatureCollection(data)
+  
+  return NextResponse.json(
+    { success: true, data: geojson, meta: { disease, year, scenario } },
+    {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400'
+      }
+    }
+  )
+}
+Database Function (created in Supabase):
+
+SQL
+
+-- Stored function for map data — single efficient query
+CREATE OR REPLACE FUNCTION get_map_data(
+  p_disease TEXT,
+  p_year SMALLINT,
+  p_scenario TEXT DEFAULT NULL
+)
+RETURNS TABLE (
+  iso3 CHAR(3),
+  iso2 CHAR(2),
+  name VARCHAR,
+  slug VARCHAR,
+  geojson JSONB,
+  score DECIMAL,
+  risk_level VARCHAR,
+  is_newly_at_risk BOOLEAN,
+  score_change_since_2000 DECIMAL,
+  population BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    c.iso3,
+    c.iso2,
+    c.name,
+    c.slug,
+    c.geojson,
+    ss.suitability_score,
+    ss.risk_level,
+    ss.is_newly_at_risk,
+    ss.score_change_since_2000,
+    COALESCE(pd.total_population, 0)
+  FROM countries c
+  LEFT JOIN diseases d ON d.slug = p_disease
+  LEFT JOIN suitability_scores ss ON 
+    ss.country_id = c.id AND 
+    ss.disease_id = d.id AND 
+    ss.year = p_year AND
+    (ss.scenario IS NULL AND p_scenario IS NULL OR ss.scenario = p_scenario)
+  LEFT JOIN population_data pd ON 
+    pd.country_id = c.id AND 
+    pd.year = LEAST(p_year, 2023)  -- Use latest available for future years
+  ORDER BY c.name;
+END;
+$$ LANGUAGE plpgsql STABLE;
+Route 2: GET /api/country/[slug]
+Purpose: Returns complete data for a single country profile page.
+
+Parameters: None (country slug from URL path)
+
+Response Shape:
+
+TypeScript
+
+{
+  success: true,
+  data: {
+    country: {
+      iso3: "EGY",
+      name: "Egypt",
+      slug: "egypt",
+      region: "Middle East & North Africa",
+      who_region: "EMRO",
+      capital: "Cairo",
+      flag_emoji: "🇪🇬",
+      area_km2: 1001449
+    },
+    
+    // All 6 diseases, current year (2024)
+    current_scores: [
+      {
+        disease: "dengue",
+        score: 0.782,
+        risk_level: "high",
+        is_newly_at_risk: false,
+        score_change_since_2000: 0.134,
+        score_change_1yr: 0.008,
+        components: {
+          temp_score: 0.95,
+          winter_score: 0.88,
+          humidity_score: 0.72,
+          rain_score: 0.61,
+          altitude_score: 1.00
+        }
+      }
+      // ... 5 more diseases
+    ],
+    
+    // Historical trend (1981-2023)
+    historical_scores: {
+      dengue: [
+        { year: 1981, score: 0.61 },
+        { year: 1982, score: 0.62 },
+        // ... through 2023
+      ],
+      malaria: [ ... ],
+      // ... 4 more diseases
+    },
+    
+    // Future projections (2024-2050, all 3 scenarios)
+    projected_scores: {
+      dengue: {
+        "SSP1-2.6": [{ year: 2024, score: 0.79, low: 0.76, high: 0.82 }, ...],
+        "SSP2-4.5": [ ... ],
+        "SSP5-8.5": [ ... ]
+      }
+    },
+    
+    // Climate history
+    climate_history: [
+      { year: 1981, temp_mean: 21.4, temp_coldest: 11.2, 
+        humidity: 58.3, precip_annual: 22.1 },
+      // ... through 2023
+    ],
+    
+    // Health system (most recent year available)
+    health_system: {
+      year: 2021,
+      hospital_beds_per_1000: 1.6,
+      physicians_per_1000: 0.8,
+      health_expenditure_per_capita: 184.2,
+      ghsi_overall_score: 35.8,
+      health_system_score: 4.2
+    },
+    
+    // Population
+    population: {
+      year: 2023,
+      total: 105914500,
+      urban_pct: 42.8
+    },
+    
+    // Vulnerability index (current year, primary disease)
+    vulnerability: {
+      score: 7.22,
+      level: "high",
+      components: {
+        suitability_weighted: 3.13,
+        health_weakness_weighted: 2.03,
+        population_weighted: 0.90,
+        trend_weighted: 1.16
+      }
+    },
+    
+    // Disease incidence history
+    incidence: {
+      dengue: [
+        { year: 2010, cases: 0, per_100k: 0 },
+        // ... through most recent year
+      ]
+    },
+    
+    // Neighboring countries (simplified)
+    neighbors: [
+      { iso3: "SDN", name: "Sudan", slug: "sudan", 
+        score: 0.71, risk_level: "high" }
+    ]
+  }
+}
+Implementation Logic:
+
+TypeScript
+
+// src/app/api/country/[slug]/route.ts
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  const supabase = createServerSupabaseClient()
+  
+  // Get country
+  const { data: country } = await supabase
+    .from('countries')
+    .select('*')
+    .eq('slug', params.slug)
+    .single()
+  
+  if (!country) {
+    return NextResponse.json(
+      { success: false, error: { code: 'NOT_FOUND', message: 'Country not found' }},
+      { status: 404 }
+    )
+  }
+  
+  // Run all queries in parallel
+  const [
+    currentScores,
+    historicalScores,
+    projectedScores,
+    climateHistory,
+    healthSystem,
+    population,
+    vulnerability,
+    incidence,
+    neighbors
+  ] = await Promise.all([
+    getCurrentScores(supabase, country.id),
+    getHistoricalScores(supabase, country.id),
+    getProjectedScores(supabase, country.id),
+    getClimateHistory(supabase, country.id),
+    getHealthSystem(supabase, country.id),
+    getPopulation(supabase, country.id),
+    getVulnerability(supabase, country.id),
+    getIncidence(supabase, country.id),
+    getNeighbors(supabase, country.iso3)
+  ])
+  
+  return NextResponse.json(
+    { success: true, data: { country, currentScores, historicalScores, 
+      projectedScores, climateHistory, healthSystem, population, 
+      vulnerability, incidence, neighbors }},
+    {
+      headers: {
+        'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800'
+      }
+    }
+  )
+}
+Route 3: GET /api/compare
+Purpose: Returns data for two countries side by side.
+
+Parameters:
+
+Parameter	Type	Required
+a	string	Yes — country slug
+b	string	Yes — country slug
+disease	string	Yes
+start_year	integer	No — default 2000
+end_year	integer	No — default 2024
+Response Shape:
+
+TypeScript
+
+{
+  success: true,
+  data: {
+    country_a: { /* full country profile */ },
+    country_b: { /* full country profile */ },
+    comparison: {
+      score_difference: 0.17,  // A - B
+      higher_risk: "a",
+      risk_level_a: "high",
+      risk_level_b: "moderate",
+      key_differences: {
+        temperature: { a: 28.4, b: 17.2, unit: "°C" },
+        health_system: { a: 4.2, b: 8.7, unit: "score/10" },
+        trend_direction: { a: "growing", b: "growing" },
+        score_change_since_2000: { a: 0.134, b: 0.228 }
+      },
+      // Auto-generated plain text insight
+      insight_text: "Egypt has 17% higher dengue suitability than Italy..."
+    }
+  }
+}
+Route 4: GET /api/trends
+Purpose: Global aggregate statistics for the Trends page.
+
+Parameters:
+
+Parameter	Type	Required
+disease	string	No — returns all diseases if omitted
+Response Shape:
+
+TypeScript
+
+{
+  success: true,
+  data: {
+    by_year: [
+      {
+        year: 1981,
+        disease: "dengue",
+        countries_high_risk: 42,
+        countries_moderate_risk: 38,
+        countries_newly_at_risk: 0,
+        total_population_at_risk: 1240000000,
+        avg_global_suitability: 0.31
+      }
+      // ... through 2023, then projections
+    ],
+    by_region: [
+      {
+        region: "South-East Asia",
+        disease: "dengue",
+        year: 2024,
+        avg_suitability: 0.84,
+        countries_high_risk: 8
+      }
+    ],
+    fastest_growing: [
+      {
+        iso3: "ITA",
+        name: "Italy",
+        disease: "dengue",
+        score_2000: 0.33,
+        score_2024: 0.64,
+        change: 0.31,
+        pct_change: 93.9
+      }
+    ],
+    newly_at_risk: [
+      {
+        iso3: "ITA", name: "Italy",
+        disease: "dengue",
+        year_crossed_threshold: 2018,
+        current_score: 0.64
+      }
+    ]
+  }
+}
+Route 5: GET /api/explorer
+Purpose: Filterable, paginated data table for the Data Explorer page.
+
+Parameters:
+
+Parameter	Type	Default
+disease	string	all
+region	string	all
+country	string	all
+year_from	integer	1981
+year_to	integer	2023
+risk_level	string	all
+page	integer	1
+per_page	integer	50 (max 200)
+sort_by	string	score
+sort_dir	string	desc
+Response Shape:
+
+TypeScript
+
+{
+  success: true,
+  data: {
+    records: [
+      {
+        country_name: "Egypt",
+        country_iso3: "EGY",
+        country_slug: "egypt",
+        disease: "dengue",
+        year: 2024,
+        score: 0.782,
+        risk_level: "high",
+        score_change_1yr: 0.008,
+        score_change_5yr: 0.043,
+        is_newly_at_risk: false
+      }
+    ],
+    pagination: {
+      total: 28470,
+      page: 1,
+      per_page: 50,
+      total_pages: 570
+    }
+  }
+}
+Route 6: POST /api/assistant
+Purpose: AI assistant endpoint. Receives a natural language query, builds database context, calls Groq, returns response.
+
+Request Body:
+
+TypeScript
+
+{
+  query: string,         // Max 500 chars
+  session_id: string,    // Client-generated anonymous ID
+  context?: {
+    current_country?: string,    // ISO3 if user is on country page
+    current_disease?: string,    // Current disease selection
+    current_year?: number        // Current year on explorer
+  }
+}
+Implementation Logic:
+
+TypeScript
+
+// src/app/api/assistant/route.ts
+
+import Groq from 'groq-sdk'
+import { buildDatabaseContext } from '@/lib/ai/context-builder'
+import { SYSTEM_PROMPT } from '@/lib/ai/system-prompt'
+import { ratelimit } from '@/lib/rate-limiter'
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+
+export async function POST(request: NextRequest) {
+  // Rate limiting: 10 requests per minute per IP
+  const ip = request.ip ?? 'unknown'
+  const { success: allowed } = await ratelimit.limit(ip)
+  
+  if (!allowed) {
+    return NextResponse.json(
+      { success: false, error: { code: 'RATE_LIMITED', 
+        message: 'Too many requests. Please wait a moment.' }},
+      { status: 429 }
+    )
+  }
+  
+  const body = await request.json()
+  const { query, session_id, context } = body
+  
+  // Validate query
+  if (!query || query.length > 500) {
+    return NextResponse.json(
+      { success: false, error: { code: 'INVALID_QUERY' }},
+      { status: 400 }
+    )
+  }
+  
+  // Build database context (query relevant data based on question)
+  const dbContext = await buildDatabaseContext(query, context)
+  
+  // Call Groq
+  const completion = await groq.chat.completions.create({
+    model: 'llama-3.1-70b-versatile',
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: `
+        DATABASE CONTEXT:
+        ${JSON.stringify(dbContext, null, 2)}
+        
+        USER QUESTION:
+        ${query}
+      `}
+    ],
+    max_tokens: 600,
+    temperature: 0.3,  // Lower temperature for factual responses
+  })
+  
+  const answer = completion.choices[0]?.message?.content
+  
+  return NextResponse.json({
+    success: true,
+    data: {
+      answer,
+      sources: dbContext.sources,
+      related_links: dbContext.related_links
+    }
+  })
+}
+AI System Prompt:
+
+TypeScript
+
+// src/lib/ai/system-prompt.ts
+
+export const SYSTEM_PROMPT = `
+You are VectorShift Assistant, a specialized AI that answers questions 
+about climate-driven disease vector risk using data from the VectorShift 
+research platform.
+
+CAPABILITIES:
+- Answer questions about dengue, malaria, zika, chikungunya, Lyme disease, 
+  and leishmaniasis habitat suitability
+- Compare disease risk between countries
+- Explain trends in disease risk over time
+- Describe how climate factors drive vector risk
+- Reference specific countries, regions, and time periods
+
+RULES:
+1. Only answer questions related to climate and disease vector risk
+2. Always base answers on the DATABASE CONTEXT provided, not general knowledge
+3. Always cite the data source at the end of your response
+4. Never provide medical advice or personal health recommendations
+5. Always include a disclaimer that this is research intelligence, not clinical guidance
+6. When data is incomplete or uncertain, say so explicitly
+7. Keep responses concise (3-5 sentences for simple questions, up to 8 for complex)
+8. Suggest relevant page links where appropriate (e.g., "See Italy's full profile")
+9. If a question is outside your scope, say so and suggest what the user can explore
+
+TONE: Scientific but accessible. Clear, direct, honest.
+
+DISCLAIMER TO INCLUDE IN EVERY RESPONSE:
+Add at end: "Source: VectorShift data (NASA POWER + WHO GHO). 
+This is research intelligence only, not medical advice."
+`
+Context Builder Logic:
+
+TypeScript
+
+// src/lib/ai/context-builder.ts
+// Analyzes the user's question and queries the most relevant data
+
+export async function buildDatabaseContext(
+  query: string, 
+  userContext?: UserContext
+) {
+  const supabase = createServerSupabaseClient()
+  
+  // Simple keyword detection to determine what data to fetch
+  const mentionedCountries = extractCountries(query)    // e.g., ['egypt', 'italy']
+  const mentionedDiseases = extractDiseases(query)      // e.g., ['dengue']
+  const mentionedYears = extractYears(query)            // e.g., [2024, 2050]
+  
+  const contextData: any = { sources: [], related_links: [] }
+  
+  // Fetch relevant country scores
+  if (mentionedCountries.length > 0) {
+    const { data } = await supabase
+      .from('suitability_scores')
+      .select(`
+        suitability_score, risk_level, year, score_change_since_2000,
+        diseases(slug, name),
+        countries(name, iso3, slug)
+      `)
+      .in('countries.slug', mentionedCountries)
+      .in('diseases.slug', mentionedDiseases.length > 0 
+        ? mentionedDiseases 
+        : VALID_DISEASES)
+      .eq('year', 2024)
+      .is('scenario', null)
+      .limit(20)
+    
+    contextData.country_scores = data
+    contextData.related_links = mentionedCountries.map(c => ({
+      text: `View ${c} profile`,
+      href: `/country/${c}`
+    }))
+  }
+  
+  // Add global context if general question
+  if (mentionedCountries.length === 0) {
+    const { data } = await supabase
+      .from('global_stats_cache')
+      .select('*')
+      .eq('year', 2024)
+      .is('scenario', null)
+      .limit(6)
+    
+    contextData.global_stats = data
+  }
+  
+  contextData.sources = [
+    'NASA POWER climate data',
+    'WHO Global Health Observatory',
+    'Published vector biology literature'
+  ]
+  
+  return contextData
+}
+Route 7: GET /api/search
+Purpose: Fast country search for the search bar in navigation and comparison page.
+
+Parameters:
+
+Parameter	Type
+q	string (min 1 char)
+Response Shape:
+
+TypeScript
+
+{
+  success: true,
+  data: {
+    results: [
+      {
+        name: "Egypt",
+        iso3: "EGY",
+        slug: "egypt",
+        flag_emoji: "🇪🇬",
+        region: "Middle East & North Africa",
+        dengue_score_2024: 0.782,
+        dengue_risk_level: "high"
+      }
+    ]
+  }
+}
+Implementation: In-memory search on startup using a pre-loaded country list (tiny dataset, no DB query needed for search).
+
+Section 5: Database Implementation
+5.1 Supabase Configuration
+Project settings:
+
+text
+
+Region: Choose nearest to expected primary users
+Database password: Strong random password, stored in .env.local
+Connection pooling: Enabled (Supabase default)
+Row Level Security: Enabled on all tables (read-only public access)
+5.2 Row Level Security Policies
+All tables are read-only for public access. No user can write to any table except through the ETL pipeline (which uses service role key).
+
+SQL
+
+-- Enable RLS on all tables
+ALTER TABLE countries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE diseases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE climate_data ENABLE ROW LEVEL SECURITY;
+ALTER TABLE climate_projections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE suitability_scores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE disease_incidence ENABLE ROW LEVEL SECURITY;
+ALTER TABLE health_system_indicators ENABLE ROW LEVEL SECURITY;
+ALTER TABLE population_data ENABLE ROW LEVEL SECURITY;
+ALTER TABLE vulnerability_index ENABLE ROW LEVEL SECURITY;
+ALTER TABLE global_stats_cache ENABLE ROW LEVEL SECURITY;
+ALTER TABLE vector_occurrences ENABLE ROW LEVEL SECURITY;
+
+-- Public read policy for all tables
+CREATE POLICY "Public read access" ON countries 
+  FOR SELECT USING (true);
+
+-- Repeat for all tables:
+CREATE POLICY "Public read access" ON diseases FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON climate_data FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON climate_projections FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON suitability_scores FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON disease_incidence FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON health_system_indicators FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON population_data FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON vulnerability_index FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON global_stats_cache FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON vector_occurrences FOR SELECT USING (true);
+
+-- AI logs: insert only, no read
+CREATE POLICY "Insert only" ON ai_conversation_logs 
+  FOR INSERT WITH CHECK (true);
+
+-- data_freshness: public read
+CREATE POLICY "Public read" ON data_freshness FOR SELECT USING (true);
+5.3 Database Indexes (Complete List)
+SQL
+
+-- Countries
+CREATE INDEX idx_countries_iso3 ON countries(iso3);
+CREATE INDEX idx_countries_slug ON countries(slug);
+CREATE INDEX idx_countries_region ON countries(region);
+CREATE INDEX idx_countries_continent ON countries(continent);
+
+-- Climate data
+CREATE INDEX idx_climate_country_year ON climate_data(country_id, year);
+CREATE INDEX idx_climate_year ON climate_data(year);
+
+-- Climate projections
+CREATE INDEX idx_proj_country_year_scenario 
+  ON climate_projections(country_id, year, scenario);
+
+-- Suitability scores (most queried table)
+CREATE INDEX idx_scores_country_disease_year 
+  ON suitability_scores(country_id, disease_id, year, scenario);
+CREATE INDEX idx_scores_disease_year 
+  ON suitability_scores(disease_id, year, scenario);
+CREATE INDEX idx_scores_risk_level ON suitability_scores(risk_level);
+CREATE INDEX idx_scores_newly_at_risk ON suitability_scores(is_newly_at_risk) 
+  WHERE is_newly_at_risk = true;
+CREATE INDEX idx_scores_year ON suitability_scores(year);
+
+-- Disease incidence
+CREATE INDEX idx_incidence_country_disease 
+  ON disease_incidence(country_id, disease_id, year);
+
+-- Health system
+CREATE INDEX idx_health_country_year 
+  ON health_system_indicators(country_id, year);
+
+-- Population
+CREATE INDEX idx_population_country_year 
+  ON population_data(country_id, year);
+
+-- Vulnerability index
+CREATE INDEX idx_vulnerability_country_disease_year 
+  ON vulnerability_index(country_id, disease_id, year, scenario);
+
+-- Vector occurrences
+CREATE INDEX idx_occurrences_disease 
+  ON vector_occurrences(disease_id);
+CREATE INDEX idx_occurrences_country 
+  ON vector_occurrences(country_id);
+
+-- Global stats cache
+CREATE INDEX idx_global_stats_disease_year 
+  ON global_stats_cache(disease_id, year, scenario);
+5.4 Materialized Views
+SQL
+
+-- Most recent suitability scores per country per disease (for fast country lists)
+CREATE MATERIALIZED VIEW latest_scores AS
+SELECT DISTINCT ON (country_id, disease_id)
+  country_id,
+  disease_id,
+  year,
+  suitability_score,
+  risk_level,
+  is_newly_at_risk,
+  score_change_since_2000
+FROM suitability_scores
+WHERE scenario IS NULL
+ORDER BY country_id, disease_id, year DESC;
+
+CREATE UNIQUE INDEX ON latest_scores(country_id, disease_id);
+
+-- Refresh after ETL completes:
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY latest_scores;
+
+
+-- Country ranking view (for trends page)
+CREATE MATERIALIZED VIEW score_rankings AS
+SELECT 
+  ss.country_id,
+  ss.disease_id,
+  ss.year,
+  ss.suitability_score,
+  RANK() OVER (
+    PARTITION BY ss.disease_id, ss.year 
+    ORDER BY ss.suitability_score DESC
+  ) as rank,
+  PERCENT_RANK() OVER (
+    PARTITION BY ss.disease_id, ss.year 
+    ORDER BY ss.suitability_score DESC
+  ) as percentile
+FROM suitability_scores ss
+WHERE ss.scenario IS NULL;
+
+CREATE INDEX ON score_rankings(country_id, disease_id, year);
+5.5 Database Storage Estimates
+text
+
+countries table:         195 rows × ~5KB = ~1MB (with GeoJSON)
+diseases table:          6 rows — negligible
+climate_data:            195 × 43 years = 8,385 rows × ~1KB = ~8MB
+climate_projections:     195 × 27 years × 3 scenarios = 15,795 rows × ~0.5KB = ~8MB
+suitability_scores:      195 × 70 years × 6 diseases × ~4 scenarios = ~328,000 rows × ~0.3KB = ~98MB
+disease_incidence:        195 × 24 years × 6 diseases = 28,080 rows × ~0.3KB = ~8MB
+health_system:           195 × 20 years = 3,900 rows = ~2MB
+population_data:         195 × 24 years = 4,680 rows = ~1MB
+vulnerability_index:     Same scale as suitability_scores = ~98MB
+vector_occurrences:      ~50,000 rows (GBIF sample) × ~0.2KB = ~10MB
+global_stats_cache:      ~840 rows = negligible
+
+TOTAL ESTIMATE: ~235MB
+
+Supabase free tier limit: 500MB — WITHIN BUDGET ✓
+Section 6: ETL Pipeline
+6.1 ETL Architecture Overview
+text
+
+┌─────────────────────────────────────────────────────────┐
+│                    ETL PIPELINE                          │
+│                                                          │
+│  PHASE 1: COLLECT                                        │
+│  ─────────────────                                       │
+│  nasa_power.py    → raw_climate/nasa/{country}.json     │
+│  who_gho.py       → raw_disease/who/{disease}.csv       │
+│  world_bank.py    → raw_health/wb/{indicator}.json      │
+│  cmip6.py         → raw_projections/{scenario}/{var}.csv│
+│  gbif.py          → raw_vectors/{species}.csv           │
+│                                                          │
+│  PHASE 2: PROCESS                                        │
+│  ─────────────────                                       │
+│  climate_processor.py → processed_climate.csv           │
+│  score_calculator.py  → suitability_scores.csv          │
+│  vulnerability_calc.py → vulnerability.csv              │
+│  geojson_builder.py   → countries.geojson               │
+│  global_stats.py      → global_stats.csv                │
+│                                                          │
+│  PHASE 3: VALIDATE                                       │
+│  ─────────────────                                       │
+│  data_validator.py → validation_report.txt              │
+│  (stops pipeline if critical errors found)               │
+│                                                          │
+│  PHASE 4: LOAD                                           │
+│  ─────────────────                                       │
+│  db_loader.py     → INSERT into Supabase tables         │
+│  storage_loader.py → Upload GeoJSON to Supabase Storage │
+│                                                          │
+│  PHASE 5: POST-PROCESS                                   │
+│  ─────────────────                                       │
+│  Refresh materialized views                              │
+│  Update data_freshness table                             │
+│  Run validation queries                                  │
+└─────────────────────────────────────────────────────────┘
+6.2 NASA POWER Collector
+Python
+
+# etl/collectors/nasa_power.py
+
+import httpx
+import json
+import time
+from pathlib import Path
+from config.countries import COUNTRIES  # List of {iso3, name, ...}
+
+NASA_POWER_URL = "https://power.larc.nasa.gov/api/temporal/monthly/country"
+
+PARAMETERS = "T2M,T2M_MIN,T2M_MAX,RH2M,PRECTOTCORR"
+
+def collect_country_climate(iso3: str, start: int = 1981, end: int = 2023) -> dict:
+    """
+    Fetch monthly climate data for a single country from NASA POWER.
+    Returns raw JSON response.
+    """
+    params = {
+        "parameters": PARAMETERS,
+        "community": "AG",
+        "country": iso3,
+        "start": str(start),
+        "end": str(end),
+        "format": "JSON",
+        "user": "vectorshift_research"
+    }
+    
+    response = httpx.get(NASA_POWER_URL, params=params, timeout=60)
+    response.raise_for_status()
+    return response.json()
+
+def collect_all_countries():
+    """
+    Collect NASA POWER data for all 195 countries.
+    Saves each result to raw_climate/nasa/{iso3}.json
+    Implements retry logic and rate limiting.
+    """
+    output_dir = Path("raw_climate/nasa")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    failed = []
+    
+    for i, country in enumerate(COUNTRIES):
+        iso3 = country['iso3']
+        output_file = output_dir / f"{iso3}.json"
+        
+        # Skip if already collected
+        if output_file.exists():
+            print(f"[{i+1}/195] {iso3} — cached, skipping")
+            continue
+        
+        print(f"[{i+1}/195] Collecting {iso3}...")
+        
+        for attempt in range(3):  # 3 retries
+            try:
+                data = collect_country_climate(iso3)
+                output_file.write_text(json.dumps(data, indent=2))
+                print(f"  ✓ {iso3} saved")
+                time.sleep(1)  # Respectful rate limiting
+                break
+            except Exception as e:
+                if attempt == 2:
+                    print(f"  ✗ {iso3} failed after 3 attempts: {e}")
+                    failed.append(iso3)
+                else:
+                    print(f"  Retry {attempt+1}...")
+                    time.sleep(5)
+    
+    if failed:
+        print(f"\nFailed countries: {failed}")
+        Path("raw_climate/failed.txt").write_text("\n".join(failed))
+    
+    print(f"\nCollection complete. {len(COUNTRIES) - len(failed)}/195 successful.")
+6.3 Score Calculator
+Python
+
+# etl/processors/score_calculator.py
+
+import pandas as pd
+import numpy as np
+from config.diseases import DISEASE_PARAMETERS
+
+def calculate_temp_score(
+    temp_mean: float, 
+    temp_min_coldest: float,
+    params: dict
+) -> tuple[float, float]:
+    """
+    Returns (temp_score, winter_score) both in range 0.0-1.0
+    """
+    t = params['temperature']
+    
+    # Temperature suitability score
+    if temp_mean < t['min'] or temp_mean > t['max']:
+        temp_score = 0.0
+    elif t['optimal_min'] <= temp_mean <= t['optimal_max']:
+        temp_score = 1.0
+    elif temp_mean < t['optimal_min']:
+        temp_score = (temp_mean - t['min']) / (t['optimal_min'] - t['min'])
+    else:
+        temp_score = (t['max'] - temp_mean) / (t['max'] - t['optimal_max'])
+    
+    # Winter survival score (can the vector overwinter?)
+    winter_min = t['winter_min']
+    if temp_min_coldest < winter_min:
+        winter_score = 0.0
+    elif temp_min_coldest > winter_min + 5:
+        winter_score = 1.0
+    else:
+        winter_score = (temp_min_coldest - winter_min) / 5.0
+    
+    return round(max(0.0, min(1.0, temp_score)), 3), \
+           round(max(0.0, min(1.0, winter_score)), 3)
+
+
+def calculate_humidity_score(humidity_mean: float, params: dict) -> float:
+    h = params['humidity']
+    if humidity_mean < h['min']:
+        return 0.0
+    elif humidity_mean > h['min'] + 20:
+        return 1.0
+    else:
+        return round((humidity_mean - h['min']) / 20.0, 3)
+
+
+def calculate_rain_score(suitable_months: int, params: dict) -> float:
+    required = params['precipitation']['required_months']
+    if suitable_months < required:
+        return 0.0
+    return round(min(1.0, suitable_months / (required * 1.5)), 3)
+
+
+def calculate_altitude_score(altitude_median: float, params: dict) -> float:
+    max_alt = params['altitude']['max']
+    if altitude_median > max_alt:
+        return 0.0
+    elif altitude_median > max_alt * 0.8:
+        return 0.5
+    else:
+        return 1.0
+
+
+def calculate_suitable_months(
+    monthly_precip: list[float], 
+    min_monthly: float
+) -> int:
+    """Count months where precipitation exceeds threshold."""
+    return sum(1 for p in monthly_precip if p >= min_monthly)
+
+
+def calculate_suitability(
+    climate_row: dict,
+    disease_slug: str
+) -> dict:
+    """
+    Calculate all score components and final suitability score
+    for one country, one year, one disease.
+    """
+    params = DISEASE_PARAMETERS[disease_slug]
+    
+    monthly_precip = [
+        climate_row.get(f'precip_monthly_{m}', 0) or 0
+        for m in ['jan','feb','mar','apr','may','jun',
+                  'jul','aug','sep','oct','nov','dec']
+    ]
+    
+    suitable_months = calculate_suitable_months(
+        monthly_precip, 
+        params['precipitation']['min_monthly']
+    )
+    
+    temp_score, winter_score = calculate_temp_score(
+        climate_row['temp_mean_annual'],
+        climate_row['temp_min_coldest'],
+        params
+    )
+    
+    humidity_score = calculate_humidity_score(
+        climate_row['humidity_mean'],
+        params
+    )
+    
+    rain_score = calculate_rain_score(suitable_months, params)
+    
+    altitude_score = calculate_altitude_score(
+        climate_row['altitude_median'],
+        params
+    )
+    
+    # Weighted composite
+    final_score = (
+        temp_score * 0.35 +
+        winter_score * 0.25 +
+        humidity_score * 0.20 +
+        rain_score * 0.15 +
+        altitude_score * 0.05
+    )
+    
+    final_score = round(max(0.0, min(1.0, final_score)), 3)
+    
+    # Risk level classification
+    if final_score >= 0.8:
+        risk_level = 'critical'
+    elif final_score >= 0.6:
+        risk_level = 'high'
+    elif final_score >= 0.4:
+        risk_level = 'moderate'
+    elif final_score >= 0.2:
+        risk_level = 'low'
+    else:
+        risk_level = 'none'
+    
+    return {
+        'temp_score': temp_score,
+        'winter_score': winter_score,
+        'humidity_score': humidity_score,
+        'rain_score': rain_score,
+        'altitude_score': altitude_score,
+        'suitability_score': final_score,
+        'risk_level': risk_level,
+        'suitable_months': suitable_months
+    }
+
+
+def calculate_all_scores(climate_df: pd.DataFrame, countries_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculate suitability scores for all countries × years × diseases.
+    Returns a DataFrame ready for database insertion.
+    """
+    results = []
+    diseases = list(DISEASE_PARAMETERS.keys())
+    
+    for _, country in countries_df.iterrows():
+        country_climate = climate_df[
+            climate_df['country_id'] == country['id']
+        ].copy()
+        
+        # Merge altitude from countries table
+        country_climate['altitude_median'] = country['altitude_median']
+        
+        for year_data in country_climate.itertuples():
+            for disease in diseases:
+                try:
+                    scores = calculate_suitability(
+                        year_data._asdict(), 
+                        disease
+                    )
+                    results.append({
+                        'country_id': country['id'],
+                        'disease_slug': disease,
+                        'year': year_data.year,
+                        'scenario': None,
+                        **scores
+                    })
+                except Exception as e:
+                    print(f"Error: {country['iso3']} {year_data.year} {disease}: {e}")
+    
+    df = pd.DataFrame(results)
+    
+    # Calculate year-over-year changes
+    df = df.sort_values(['country_id', 'disease_slug', 'year'])
+    df['score_change_1yr'] = df.groupby(
+        ['country_id', 'disease_slug']
+    )['suitability_score'].diff(1)
+    df['score_change_5yr'] = df.groupby(
+        ['country_id', 'disease_slug']
+    )['suitability_score'].diff(5)
+    
+    # Score change since 2000
+    scores_2000 = df[df['year'] == 2000][
+        ['country_id', 'disease_slug', 'suitability_score']
+    ].rename(columns={'suitability_score': 'score_2000'})
+    
+    df = df.merge(scores_2000, on=['country_id', 'disease_slug'], how='left')
+    df['score_change_since_2000'] = df['suitability_score'] - df['score_2000']
+    df.drop(columns=['score_2000'], inplace=True)
+    
+    # Flag newly at risk (crossed 0.4 threshold in last 5 years)
+    def is_newly_at_risk(group):
+        group = group.sort_values('year')
+        recent = group[group['year'] >= group['year'].max() - 5]
+        past = group[group['year'] < group['year'].max() - 5]
+        if len(past) == 0:
+            return pd.Series([False] * len(group), index=group.index)
+        
+        was_below = (past['suitability_score'] < 0.4).all()
+        is_above = (recent['suitability_score'] >= 0.4).any()
+        newly = was_below and is_above
+        return pd.Series([newly] * len(group), index=group.index)
+    
+    df['is_newly_at_risk'] = df.groupby(
+        ['country_id', 'disease_slug'], 
+        group_keys=False
+    ).apply(is_newly_at_risk)
+    
+    return df
+6.4 ETL Orchestrator
+Python
+
+# etl/main.py
+
+import sys
+import logging
+from datetime import datetime
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s %(message)s',
+    handlers=[
+        logging.FileHandler(f'etl_run_{datetime.now().strftime("%Y%m%d")}.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+def run_full_etl():
+    """
+    Complete ETL pipeline. Run this once to populate the database.
+    Can be re-run annually for data refresh.
+    """
+    logger.info("=" * 60)
+    logger.info("VECTORSHIFT ETL PIPELINE STARTING")
+    logger.info("=" * 60)
+    
+    try:
+        # PHASE 1: COLLECT
+        logger.info("\n[PHASE 1] COLLECTING RAW DATA")
+        
+        logger.info("Collecting NASA POWER climate data...")
+        from collectors.nasa_power import collect_all_countries
+        collect_all_countries()
+        
+        logger.info("Collecting WHO disease incidence data...")
+        from collectors.who_gho import collect_who_data
+        collect_who_data()
+        
+        logger.info("Collecting World Bank health indicators...")
+        from collectors.world_bank import collect_world_bank_data
+        collect_world_bank_data()
+        
+        logger.info("Collecting CMIP6 climate projections...")
+        from collectors.cmip6 import collect_projections
+        collect_projections()
+        
+        logger.info("Collecting GBIF vector occurrences...")
+        from collectors.gbif import collect_occurrences
+        collect_occurrences()
+        
+        # PHASE 2: PROCESS
+        logger.info("\n[PHASE 2] PROCESSING DATA")
+        
+        logger.info("Processing climate data...")
+        from processors.climate_processor import process_all_climate
+        climate_df, projections_df = process_all_climate()
+        
+        logger.info("Calculating suitability scores...")
+        from processors.score_calculator import calculate_all_scores
+        scores_df = calculate_all_scores(climate_df)
+        scores_proj_df = calculate_all_scores(projections_df)
+        
+        logger.info("Calculating vulnerability index...")
+        from processors.vulnerability_calc import calculate_vulnerability
+        vulnerability_df = calculate_vulnerability(scores_df)
+        
+        logger.info("Building GeoJSON...")
+        from processors.geojson_builder import build_countries_geojson
+        build_countries_geojson()
+        
+        logger.info("Calculating global statistics...")
+        from processors.global_stats import calculate_global_stats
+        global_stats_df = calculate_global_stats(scores_df)
+        
+        # PHASE 3: VALIDATE
+        logger.info("\n[PHASE 3] VALIDATING DATA")
+        from validators.data_validator import validate_all
+        validation_passed = validate_all(
+            climate_df, scores_df, vulnerability_df
+        )
+        
+        if not validation_passed:
+            logger.error("VALIDATION FAILED. Aborting pipeline.")
+            sys.exit(1)
+        
+        # PHASE 4: LOAD
+        logger.info("\n[PHASE 4] LOADING TO DATABASE")
+        from loaders.db_loader import load_all_data
+        load_all_data(
+            climate_df=climate_df,
+            projections_df=projections_df,
+            scores_df=scores_df,
+            scores_proj_df=scores_proj_df,
+            vulnerability_df=vulnerability_df,
+            global_stats_df=global_stats_df
+        )
+        
+        logger.info("Uploading GeoJSON to Supabase Storage...")
+        from loaders.storage_loader import upload_geojson
+        upload_geojson()
+        
+        # PHASE 5: POST-PROCESS
+        logger.info("\n[PHASE 5] POST-PROCESSING")
+        from loaders.db_loader import refresh_views, update_data_freshness
+        refresh_views()
+        update_data_freshness()
+        
+        logger.info("\n" + "=" * 60)
+        logger.info("ETL PIPELINE COMPLETE ✓")
+        logger.info("=" * 60)
+        
+    except Exception as e:
+        logger.error(f"ETL PIPELINE FAILED: {e}", exc_info=True)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    run_full_etl()
+Section 7: State Management
+7.1 Zustand Stores
+TypeScript
+
+// src/hooks/useMapStore.ts
+// Controls the entire explorer map state
+
+import { create } from 'zustand'
+import { subscribeWithSelector } from 'zustand/middleware'
+
+type DiseaseSlug = 'dengue' | 'malaria' | 'zika' | 'chikungunya' | 'lyme' | 'leishmaniasis'
+type Scenario = 'SSP1-2.6' | 'SSP2-4.5' | 'SSP5-8.5'
+
+interface MapState {
+  // Current selections
+  activeDisease: DiseaseSlug
+  activeYear: number
+  activeScenario: Scenario
+  
+  // Panel state
+  selectedCountrySlug: string | null
+  isPanelOpen: boolean
+  isLeftPanelOpen: boolean
+  
+  // Layer visibility
+  showHealthSystemLayer: boolean
+  showPopulationLayer: boolean
+  showNewlyAtRiskLayer: boolean
+  
+  // Risk filter
+  riskFilter: 'all' | 'high' | 'newly_at_risk' | 'declining'
+  
+  // Time slider animation
+  isPlaying: boolean
+  playSpeed: 'slow' | 'normal' | 'fast'
+  
+  // UI state
+  isProjected: boolean  // true when year > 2023
+  
+  // Actions
+  setDisease: (disease: DiseaseSlug) => void
+  setYear: (year: number) => void
+  setScenario: (scenario: Scenario) => void
+  selectCountry: (slug: string | null) => void
+  togglePanel: () => void
+  toggleLeftPanel: () => void
+  toggleLayer: (layer: string) => void
+  setRiskFilter: (filter: string) => void
+  startPlaying: () => void
+  stopPlaying: () => void
+  setPlaySpeed: (speed: 'slow' | 'normal' | 'fast') => void
+  advanceYear: () => void
+}
+
+export const useMapStore = create<MapState>()(
+  subscribeWithSelector((set, get) => ({
+    activeDisease: 'dengue',
+    activeYear: 2024,
+    activeScenario: 'SSP2-4.5',
+    selectedCountrySlug: null,
+    isPanelOpen: false,
+    isLeftPanelOpen: true,
+    showHealthSystemLayer: false,
+    showPopulationLayer: false,
+    showNewlyAtRiskLayer: true,
+    riskFilter: 'all',
+    isPlaying: false,
+    playSpeed: 'normal',
+    isProjected: false,
+    
+    setDisease: (disease) => set({ activeDisease: disease }),
+    
+    setYear: (year) => set({ 
+      activeYear: year,
+      isProjected: year > 2023
+    }),
+    
+    setScenario: (scenario) => set({ activeScenario: scenario }),
+    
+    selectCountry: (slug) => set({ 
+      selectedCountrySlug: slug,
+      isPanelOpen: slug !== null
+    }),
+    
+    togglePanel: () => set(state => ({ isPanelOpen: !state.isPanelOpen })),
+    
+    toggleLeftPanel: () => set(state => ({ 
+      isLeftPanelOpen: !state.isLeftPanelOpen 
+    })),
+    
+    toggleLayer: (layer) => {
+      const layerKey = `show${layer}Layer` as keyof MapState
+      set(state => ({ [layerKey]: !state[layerKey] } as any))
+    },
+    
+    setRiskFilter: (filter) => set({ riskFilter: filter as any }),
+    
+    startPlaying: () => set({ isPlaying: true }),
+    stopPlaying: () => set({ isPlaying: false }),
+    setPlaySpeed: (speed) => set({ playSpeed: speed }),
+    
+    advanceYear: () => {
+      const { activeYear, stopPlaying } = get()
+      if (activeYear >= 2050) {
+        stopPlaying()
+        return
+      }
+      set({ 
+        activeYear: activeYear + 1,
+        isProjected: activeYear + 1 > 2023
+      })
+    }
+  }))
+)
+TypeScript
+
+// src/hooks/useExplorerStore.ts
+// Controls data explorer filter state
+
+import { create } from 'zustand'
+
+interface ExplorerState {
+  disease: string
+  region: string
+  country: string
+  yearFrom: number
+  yearTo: number
+  riskLevel: string
+  page: number
+  perPage: number
+  sortBy: string
+  sortDir: 'asc' | 'desc'
+  
+  setFilter: (key: string, value: any) => void
+  resetFilters: () => void
+  setPage: (page: number) => void
+  setSort: (column: string) => void
+}
+
+const DEFAULT_FILTERS = {
+  disease: 'all',
+  region: 'all',
+  country: 'all',
+  yearFrom: 1981,
+  yearTo: 2023,
+  riskLevel: 'all',
+  page: 1,
+  perPage: 50,
+  sortBy: 'score',
+  sortDir: 'desc' as const,
+}
+
+export const useExplorerStore = create<ExplorerState>((set, get) => ({
+  ...DEFAULT_FILTERS,
+  
+  setFilter: (key, value) => set({ [key]: value, page: 1 }),
+  
+  resetFilters: () => set(DEFAULT_FILTERS),
+  
+  setPage: (page) => set({ page }),
+  
+  setSort: (column) => set(state => ({
+    sortBy: column,
+    sortDir: state.sortBy === column && state.sortDir === 'desc' 
+      ? 'asc' 
+      : 'desc'
+  }))
+}))
+7.2 React Query Configuration
+TypeScript
+
+// src/lib/query-client.ts
+
+import { QueryClient } from '@tanstack/react-query'
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 60,        // 1 hour — data changes rarely
+      gcTime: 1000 * 60 * 60 * 24,      // 24 hours garbage collection
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+      refetchOnWindowFocus: false,       // Data doesn't change while user is browsing
+      refetchOnReconnect: false,
+    }
+  }
+})
+
+// Query key factory — centralized, type-safe
+export const queryKeys = {
+  map: (disease: string, year: number, scenario?: string) => 
+    ['map', disease, year, scenario] as const,
+    
+  country: (slug: string) => 
+    ['country', slug] as const,
+    
+  compare: (a: string, b: string, disease: string) => 
+    ['compare', a, b, disease] as const,
+    
+  trends: (disease: string) => 
+    ['trends', disease] as const,
+    
+  explorer: (filters: object) => 
+    ['explorer', filters] as const,
+    
+  search: (query: string) => 
+    ['search', query] as const,
+}
+PART THREE: FRONTEND SPECIFICATION
+Section 8: Next.js Configuration
+8.1 next.config.js
+JavaScript
+
+// next.config.js
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // Enable static generation with ISR
+  output: 'standalone',
+  
+  // Image optimization
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [],  // No external images needed
+  },
+  
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com",
+              "style-src 'self' 'unsafe-inline' https://api.mapbox.com",
+              "img-src 'self' data: blob: https://*.mapbox.com",
+              "connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://*.supabase.co",
+              "worker-src blob:",
+            ].join('; '),
+          },
+        ],
+      },
+    ]
+  },
+  
+  // Redirects
+  async redirects() {
+    return [
+      {
+        source: '/map',
+        destination: '/explorer',
+        permanent: true,
+      },
+    ]
+  },
+  
+  // Experimental features
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'recharts', '@radix-ui/react-*'],
+  },
+  
+  // Webpack for mapbox-gl
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'mapbox-gl': 'mapbox-gl',
+    }
+    return config
+  },
+}
+
+module.exports = nextConfig
+8.2 Tailwind Configuration
+TypeScript
+
+// tailwind.config.ts
+
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
+  darkMode: 'class',
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Background system
+        background: {
+          primary:   '#080C14',
+          secondary: '#0D1220',
+          tertiary:  '#131828',
+          hover:     '#1A2035',
+        },
+        // Border system
+        border: {
+          subtle:  '#1E2640',
+          default: '#2A3358',
+          strong:  '#3D4F7C',
+        },
+        // Text system
+        text: {
+          primary:   '#F0F4FF',
+          secondary: '#8B9CC0',
+          tertiary:  '#556080',
+          disabled:  '#3A4560',
+        },
+        // Accent system (amber)
+        accent: {
+          50:  '#FFF8E7',
+          100: '#FEEFC3',
+          200: '#FCD97A',
+          300: '#F9BE42',
+          400: '#F5A623',
+          500: '#E08B0A',
+          600: '#B86D06',
+        },
+        // Risk scale
+        risk: {
+          none:     '#1A1F2E',
+          low:      '#1E3A2F',
+          moderate: '#4A3B1A',
+          high:     '#6B2D10',
+          critical: '#7A1515',
+          new:      '#2A4A6B',
+        },
+        // Semantic
+        success: '#1E6B4A',
+        warning: '#7A5A0A',
+        danger:  '#7A1515',
+        info:    '#1A3A6B',
+      },
+      
+      fontFamily: {
+        sans:  ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Cabinet Grotesk', 'Inter', 'system-ui', 'sans-serif'],
+        mono:  ['JetBrains Mono', 'Consolas', 'monospace'],
+      },
+      
+      fontSize: {
+        'display-2xl': ['4.5rem',   { lineHeight: '1.1', fontWeight: '700' }],
+        'display-xl':  ['3.75rem',  { lineHeight: '1.1', fontWeight: '700' }],
+        'display-lg':  ['3rem',     { lineHeight: '1.1', fontWeight: '600' }],
+        'display-md':  ['2.25rem',  { lineHeight: '1.2', fontWeight: '600' }],
+        'display-sm':  ['1.875rem', { lineHeight: '1.2', fontWeight: '600' }],
+      },
+      
+      spacing: {
+        '18': '4.5rem',
+        '22': '5.5rem',
+        '26': '6.5rem',
+        '30': '7.5rem',
+      },
+      
+      borderRadius: {
+        'sm': '4px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '16px',
+        '2xl': '24px',
+      },
+      
+      boxShadow: {
+        'sm':         '0 1px 2px 0 rgba(0,0,0,0.4)',
+        'md':         '0 4px 6px -1px rgba(0,0,0,0.5), 0 2px 4px -1px rgba(0,0,0,0.3)',
+        'lg':         '0 10px 15px -3px rgba(0,0,0,0.6), 0 4px 6px -2px rgba(0,0,0,0.4)',
+        'xl':         '0 20px 25px -5px rgba(0,0,0,0.7), 0 10px 10px -5px rgba(0,0,0,0.4)',
+        'glow-accent':'0 0 20px rgba(245,166,35,0.15)',
+        'glow-risk':  '0 0 16px rgba(122,21,21,0.2)',
+      },
+      
+      animation: {
+        'count-up':      'countUp 1s ease-out forwards',
+        'shimmer':       'shimmer 1.5s infinite',
+        'pulse-border':  'pulseBorder 2s ease-in-out infinite',
+        'draw-line':     'drawLine 0.8s ease-out forwards',
+      },
+      
+      keyframes: {
+        countUp: {
+          '0%':   { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        shimmer: {
+          '0%':   { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        pulseBorder: {
+          '0%, 100%': { opacity: '0.6' },
+          '50%':      { opacity: '1.0' },
+        },
+        drawLine: {
+          '0%':   { strokeDashoffset: '1000' },
+          '100%': { strokeDashoffset: '0' },
+        },
+      },
+    },
+  },
+  plugins: [
+    require('tailwindcss-animate'),
+  ],
+}
+
+export default config
+8.3 Root Layout
+TypeScript
+
+// src/app/layout.tsx
+
+import type { Metadata, Viewport } from 'next'
+import { Inter, JetBrains_Mono } from 'next/font/google'
+import localFont from 'next/font/local'
+import { ThemeProvider } from '@/components/layout/ThemeProvider'
+import { Navigation } from '@/components/layout/Navigation'
+import { Providers } from './providers'
+import './globals.css'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+})
+
+const cabinetGrotesk = localFont({
+  src: '../public/fonts/cabinet-grotesk.woff2',
+  variable: '--font-display',
+  display: 'swap',
+})
+
+export const metadata: Metadata = {
+  title: {
+    default: 'VectorShift — Climate-Driven Disease Risk Intelligence',
+    template: '%s | VectorShift',
+  },
+  description: 'Track how climate change is expanding the geographic range of disease-carrying vectors. Interactive global maps powered by NASA and WHO data.',
+  keywords: ['climate change', 'disease risk', 'dengue', 'malaria', 'vector-borne disease', 'public health', 'epidemiology'],
+  authors: [{ name: 'VectorShift' }],
+  openGraph: {
+    type: 'website',
+    title: 'VectorShift — Climate-Driven Disease Risk Intelligence',
+    description: 'Watch how dengue, malaria, and other diseases are spreading into new regions as the climate changes.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#080C14',
+  colorScheme: 'dark light',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html 
+      lang="en" 
+      suppressHydrationWarning
+      className={`${inter.variable} ${jetbrainsMono.variable} ${cabinetGrotesk.variable}`}
+    >
+      <body className="bg-background-primary text-text-primary antialiased">
+        <Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange={false}
+          >
+            <Navigation />
+            <main>
+              {children}
+            </main>
+          </ThemeProvider>
+        </Providers>
+      </body>
+    </html>
+  )
+}
+Section 9: Key Component Specifications
+9.1 GlobalMap Component
+TypeScript
+
+// src/components/map/GlobalMap.tsx
+// This is the most complex component. Full specification below.
+
+'use client'
+
+import { useEffect, useRef, useCallback } from 'react'
+import mapboxgl from 'mapbox-gl'
+import 'mapbox-gl/dist/mapbox-gl.css'
+import { useMapStore } from '@/hooks/useMapStore'
+import { useMapData } from '@/hooks/useMapData'
+import { MAPBOX_STYLE_URL } from '@/lib/mapbox/config'
+import { buildRiskColorExpression } from '@/lib/mapbox/colors'
+import { CountryPanel } from './CountryPanel'
+import { DiseaseSelector } from './DiseaseSelector'
+import { TimeSlider } from './TimeSlider'
+import { MapLegend } from './MapLegend'
+import { MapControls } from './MapControls'
+import { ScenarioToggle } from './ScenarioToggle'
+
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!
+
+export function GlobalMap() {
+  const mapContainer = useRef<HTMLDivElement>(null)
+  const map = useRef<mapboxgl.Map | null>(null)
+  const isMapLoaded = useRef(false)
+  
+  const { 
+    activeDisease, 
+    activeYear, 
+    activeScenario,
+    selectedCountrySlug,
+    isProjected,
+    showNewlyAtRiskLayer,
+    selectCountry
+  } = useMapStore()
+  
+  const { data: mapData, isLoading } = useMapData(
+    activeDisease, 
+    activeYear, 
+    isProjected ? activeScenario : undefined
+  )
+  
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainer.current || map.current) return
+    
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: MAPBOX_STYLE_URL,
+      center: [20, 20],
+      zoom: 1.8,
+      minZoom: 1,
+      maxZoom: 8,
+      projection: 'naturalEarth',  // Proper world map projection
+      antialias: true,
+    })
+    
+    map.current.on('load', () => {
+      isMapLoaded.current = true
+      initializeLayers()
+    })
+    
+    return () => {
+      map.current?.remove()
+      map.current = null
+    }
+  }, [])
+  
+  const initializeLayers = useCallback(() => {
+    if (!map.current) return
+    
+    // Country fill layer (data-driven coloring)
+    map.current.addSource('countries', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+      generateId: true,
+    })
+    
+    map.current.addLayer({
+      id: 'country-fill',
+      type: 'fill',
+      source: 'countries',
+      paint: {
+        'fill-color': buildRiskColorExpression(),
+        'fill-opacity': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          0.85,
+          0.70
+        ],
+      }
+    })
+    
+    // Country border layer
+    map.current.addLayer({
+      id: 'country-border',
+      type: 'line',
+      source: 'countries',
+      paint: {
+        'line-color': '#2A3358',
+        'line-width': 0.5,
+      }
+    })
+    
+    // Newly-at-risk pulsing border layer
+    map.current.addLayer({
+      id: 'country-new-risk-border',
+      type: 'line',
+      source: 'countries',
+      filter: ['==', ['get', 'is_newly_at_risk'], true],
+      paint: {
+        'line-color': '#F5A623',
+        'line-width': 2,
+        'line-opacity': [
+          'interpolate',
+          ['linear'],
+          ['get', 'suitability_score'],
+          0.4, 0.5,
+          1.0, 1.0,
+        ],
+      }
+    })
+    
+    // Hover interaction
+    let hoveredCountryId: string | null = null
+    
+    map.current.on('mousemove', 'country-fill', (e) => {
+      if (e.features && e.features.length > 0) {
+        if (hoveredCountryId !== null) {
+          map.current!.setFeatureState(
+            { source: 'countries', id: hoveredCountryId },
+            { hover: false }
+          )
+        }
+        hoveredCountryId = e.features[0].id as string
+        map.current!.setFeatureState(
+          { source: 'countries', id: hoveredCountryId },
+          { hover: true }
+        )
+        map.current!.getCanvas().style.cursor = 'pointer'
+      }
+    })
+    
+    map.current.on('mouseleave', 'country-fill', () => {
+      if (hoveredCountryId !== null) {
+        map.current!.setFeatureState(
+          { source: 'countries', id: hoveredCountryId },
+          { hover: false }
+        )
+        hoveredCountryId = null
+      }
+      map.current!.getCanvas().style.cursor = ''
+    })
+    
+    // Click interaction
+    map.current.on('click', 'country-fill', (e) => {
+      if (e.features && e.features.length > 0) {
+        const slug = e.features[0].properties?.slug
+        if (slug) selectCountry(slug)
+      }
+    })
+    
+  }, [selectCountry])
+  
+  // Update map data when disease/year/scenario changes
+  useEffect(() => {
+    if (!map.current || !isMapLoaded.current || !mapData) return
+    
+    const source = map.current.getSource('countries') as mapboxgl.GeoJSONSource
+    if (source) {
+      source.setData(mapData)
+    }
+  }, [mapData])
+  
+  // Animate newly-at-risk border opacity
+  useEffect(() => {
+    if (!map.current || !isMapLoaded.current) return
+    
+    let startTime: number
+    let animFrame: number
+    
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp
+      const elapsed = (timestamp - startTime) / 2000  // 2 second cycle
+      const opacity = 0.6 + 0.4 * Math.sin(elapsed * Math.PI * 2)
+      
+      map.current?.setPaintProperty(
+        'country-new-risk-border',
+        'line-opacity',
+        showNewlyAtRiskLayer ? opacity : 0
+      )
+      
+      animFrame = requestAnimationFrame(animate)
+    }
+    
+    animFrame = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(animFrame)
+  }, [showNewlyAtRiskLayer])
+  
+  return (
+    <div className="relative w-full h-[calc(100vh-64px)] overflow-hidden">
+      {/* Map container */}
+      <div ref={mapContainer} className="absolute inset-0" />
+      
+      {/* Loading overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-background-primary/30 
+                        flex items-center justify-center">
+          <div className="text-text-secondary text-sm font-mono">
+            Loading {activeYear} data...
+          </div>
+        </div>
+      )}
+      
+      {/* Projected data indicator */}
+      {isProjected && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 
+                        bg-accent-400/10 border border-accent-400/30 
+                        text-accent-400 text-xs font-medium px-3 py-1.5 
+                        rounded-full backdrop-blur-sm">
+          PROJECTED DATA — {activeScenario} Scenario
+        </div>
+      )}
+      
+      {/* Left disease selector panel */}
+      <DiseaseSelector />
+      
+      {/* Right country panel */}
+      <CountryPanel />
+      
+      {/* Bottom time slider */}
+      <TimeSlider />
+      
+      {/* Scenario toggle (only when projected) */}
+      {isProjected && <ScenarioToggle />}
+      
+      {/* Map legend */}
+      <MapLegend />
+      
+      {/* Zoom/pan controls */}
+      <MapControls />
+    </div>
+  )
+}
+9.2 TimeSlider Component
+TypeScript
+
+// src/components/map/TimeSlider.tsx
+// Custom time slider with play/pause animation
+
+'use client'
+
+import { useEffect, useRef, useCallback } from 'react'
+import { useMapStore } from '@/hooks/useMapStore'
+import { Play, Pause, SkipBack } from 'lucide-react'
+
+const MIN_YEAR = 1981
+const MAX_YEAR = 2050
+const PROJECTED_START = 2024
+
+const PLAY_SPEEDS = {
+  slow: 800,
+  normal: 500,
+  fast: 250,
+}
+
+export function TimeSlider() {
+  const { 
+    activeYear, 
+    isPlaying, 
+    playSpeed,
+    setYear, 
+    startPlaying, 
+    stopPlaying,
+    advanceYear,
+    setPlaySpeed
+  } = useMapStore()
+  
+  const intervalRef = useRef<NodeJS.Timeout>()
+  const sliderRef = useRef<HTMLInputElement>(null)
+  
+  // Play animation
+  useEffect(() => {
+    if (isPlaying) {
+      intervalRef.current = setInterval(
+        advanceYear, 
+        PLAY_SPEEDS[playSpeed]
+      )
+    } else {
+      clearInterval(intervalRef.current)
+    }
+    
+    return () => clearInterval(intervalRef.current)
+  }, [isPlaying, playSpeed, advanceYear])
+  
+  const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    stopPlaying()
+    setYear(parseInt(e.target.value))
+  }, [stopPlaying, setYear])
+  
+  const handleReset = useCallback(() => {
+    stopPlaying()
+    setYear(MIN_YEAR)
+  }, [stopPlaying, setYear])
+  
+  const togglePlay = useCallback(() => {
+    if (activeYear >= MAX_YEAR) setYear(MIN_YEAR)
+    isPlaying ? stopPlaying() : startPlaying()
+  }, [isPlaying, activeYear, startPlaying, stopPlaying, setYear])
+  
+  // Calculate slider progress percentage
+  const pct = ((activeYear - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100
+  const projectedPct = ((PROJECTED_START - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100
+  
+  return (
+    <div className="absolute bottom-0 left-0 right-0 
+                    bg-background-secondary/90 backdrop-blur-md
+                    border-t border-border-subtle
+                    px-6 py-4">
+      
+      {/* Year display */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          {/* Play/Pause */}
+          <button
+            onClick={togglePlay}
+            className="w-8 h-8 rounded-full bg-accent-400 hover:bg-accent-300
+                       text-background-primary flex items-center justify-center
+                       transition-colors duration-150"
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? (
+              <Pause size={14} strokeWidth={2.5} />
+            ) : (
+              <Play size={14} strokeWidth={2.5} fill="currentColor" />
+            )}
+          </button>
+          
+          {/* Reset */}
+          <button
+            onClick={handleReset}
+            className="w-8 h-8 rounded-full border border-border-default 
+                       text-text-secondary hover:text-text-primary hover:border-border-strong
+                       flex items-center justify-center transition-colors duration-150"
+            aria-label="Reset to 1981"
+          >
+            <SkipBack size={14} />
+          </button>
+          
+          {/* Speed selector */}
+          <div className="flex items-center gap-1 ml-2">
+            {(['slow', 'normal', 'fast'] as const).map(speed => (
+              <button
+                key={speed}
+                onClick={() => setPlaySpeed(speed)}
+                className={`text-xs px-2 py-1 rounded transition-colors duration-150 ${
+                  playSpeed === speed
+                    ? 'bg-border-default text-text-primary'
+                    : 'text-text-tertiary hover:text-text-secondary'
+                }`}
+              >
+                {speed === 'slow' ? '0.5×' : speed === 'normal' ? '1×' : '2×'}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Current year display */}
+        <div className="font-mono text-2xl font-bold text-text-primary">
+          {activeYear}
+          {activeYear > 2023 && (
+            <span className="text-accent-400 text-sm font-normal ml-2">
+              PROJECTED
+            </span>
+          )}
+        </div>
+        
+        {/* Year range labels */}
+        <div className="flex gap-4 text-text-tertiary text-xs font-mono">
+          <span>{MIN_YEAR}</span>
+          <span>TODAY: {PROJECTED_START}</span>
+          <span>{MAX_YEAR}</span>
+        </div>
+      </div>
+      
+      {/* Slider track */}
+      <div className="relative h-6 flex items-center">
+        {/* Background track */}
+        <div className="absolute w-full h-1 bg-border-default rounded-full" />
+        
+        {/* Historical fill */}
+        <div 
+          className="absolute h-1 bg-accent-400 rounded-full transition-none"
+          style={{ width: `${Math.min(pct, projectedPct)}%` }}
+        />
+        
+        {/* Projected fill (dashed effect via repeating gradient) */}
+        {pct > projectedPct && (
+          <div 
+            className="absolute h-1 rounded-r-full"
+            style={{ 
+              left: `${projectedPct}%`,
+              width: `${pct - projectedPct}%`,
+              background: `repeating-linear-gradient(
+                90deg, 
+                #F5A623 0px, #F5A623 4px, 
+                transparent 4px, transparent 8px
+              )`
+            }}
+          />
+        )}
+        
+        {/* TODAY marker */}
+        <div 
+          className="absolute flex flex-col items-center"
+          style={{ left: `${projectedPct}%`, transform: 'translateX(-50%)' }}
+        >
+          <div className="w-px h-3 bg-text-tertiary" />
+          <span className="text-text-tertiary text-xs mt-1">NOW</span>
+        </div>
+        
+        {/* Native range input (invisible, handles drag) */}
+        <input
+          ref={sliderRef}
+          type="range"
+          min={MIN_YEAR}
+          max={MAX_YEAR}
+          value={activeYear}
+          onChange={handleSliderChange}
+          className="absolute w-full opacity-0 cursor-pointer h-6 z-10"
+          aria-label="Select year"
+        />
+        
+        {/* Custom thumb */}
+        <div 
+          className="absolute w-8 h-8 rounded-full bg-accent-400 
+                     border-2 border-background-primary
+                     flex items-center justify-center
+                     shadow-glow-accent pointer-events-none
+                     -translate-x-1/2 transition-none"
+          style={{ left: `${pct}%` }}
+        >
+          <span className="text-background-primary text-xs font-mono font-bold leading-none">
+            {String(activeYear).slice(2)}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+Section 10: Performance Optimization
+10.1 Static Generation Strategy
+TypeScript
+
+// src/app/country/[slug]/page.tsx
+// Country pages use ISR — generated at build time, revalidated daily
+
+import { generateStaticParams } from './generateStaticParams'
+import { Metadata } from 'next'
+
+// Generate all 195 country pages at build time
+export async function generateStaticParams() {
+  const countries = await getCountrySlugs()  // Simple DB query
+  return countries.map(c => ({ slug: c.slug }))
+}
+
+// Each page revalidates after 24 hours (ISR)
+export const revalidate = 86400
+
+export async function generateMetadata(
+  { params }: { params: { slug: string } }
+): Promise<Metadata> {
+  const country = await getCountryBySlug(params.slug)
+  
+  return {
+    title: `${country.name} — Disease Vector Risk Profile`,
+    description: `Climate-driven disease vector risk analysis for ${country.name}. Dengue, malaria, and other vector-borne disease risk trends from 1981 to 2050.`,
+  }
+}
+
+export default async function CountryPage({ 
+  params 
+}: { 
+  params: { slug: string } 
+}) {
+  // Data fetched at build time (no client-side request needed)
+  const data = await getCountryData(params.slug)
+  
+  if (!data) notFound()
+  
+  return <CountryProfile data={data} />
+}
+10.2 GeoJSON Optimization
+The GeoJSON for the map must be optimized to keep file size manageable:
+
+Python
+
+# etl/processors/geojson_builder.py
+
+import geopandas as gpd
+import json
+from shapely.geometry import mapping
+import topojson
+
+def build_countries_geojson():
+    """
+    Build optimized GeoJSON for Mapbox.
+    
+    Optimizations:
+    1. Simplify polygon geometries (reduce vertices)
+    2. Limit decimal precision to 3 places
+    3. Minimize properties (only what Mapbox needs)
+    4. Split into world + detail levels
+    """
+    # Load Natural Earth 110m (for world view, zoom 1-4)
+    world_low = gpd.read_file('natural_earth/ne_110m_admin_0_countries.shp')
+    
+    # Load Natural Earth 50m (for regional view, zoom 4-7)  
+    world_med = gpd.read_file('natural_earth/ne_50m_admin_0_countries.shp')
+    
+    # Simplify geometries (tolerance in degrees)
+    world_low.geometry = world_low.geometry.simplify(
+        tolerance=0.5, 
+        preserve_topology=True
+    )
+    world_med.geometry = world_med.geometry.simplify(
+        tolerance=0.1,
+        preserve_topology=True
+    )
+    
+    # Keep only necessary columns
+    keep_cols = ['ISO_A3', 'ISO_A2', 'NAME', 'geometry']
+    world_low = world_low[keep_cols]
+    world_med = world_med[keep_cols]
+    
+    # Save as GeoJSON with precision=3
+    world_low.to_file(
+        'processed/countries_world.geojson',
+        driver='GeoJSON',
+        precision=3
+    )
+    world_med.to_file(
+        'processed/countries_regional.geojson',
+        driver='GeoJSON',
+        precision=4
+    )
+    
+    # Validate file sizes
+    for fname in ['countries_world.geojson', 'countries_regional.geojson']:
+        size_mb = Path(f'processed/{fname}').stat().st_size / 1e6
+        print(f"{fname}: {size_mb:.1f} MB")
+        assert size_mb < 3.0, f"{fname} is too large: {size_mb}MB"
+    
+    print("GeoJSON built successfully")
+10.3 Map Data Payload Optimization
+TypeScript
+
+// src/lib/mapbox/colors.ts
+// Pre-built Mapbox expression for data-driven coloring
+
+export function buildRiskColorExpression(): mapboxgl.Expression {
+  return [
+    'interpolate',
+    ['linear'],
+    ['coalesce', ['get', 'score'], 0],
+    0.0, '#1A1F2E',   // risk-none
+    0.2, '#1E3A2F',   // risk-low
+    0.4, '#4A3B1A',   // risk-moderate
+    0.6, '#6B2D10',   // risk-high
+    0.8, '#7A1515',   // risk-critical
+    1.0, '#9B1A1A',   // risk-critical max
+  ]
+}
+10.4 Bundle Size Optimization
+TypeScript
+
+// Dynamic imports for heavy libraries
+
+// Mapbox — loaded only on explorer page
+const GlobalMap = dynamic(
+  () => import('@/components/map/GlobalMap'),
+  {
+    ssr: false,  // Mapbox GL JS is browser-only
+    loading: () => <MapSkeleton />
+  }
+)
+
+// D3 — loaded only when complex charts needed
+const SankeyDiagram = dynamic(
+  () => import('@/components/charts/SankeyDiagram'),
+  { loading: () => <ChartSkeleton /> }
+)
+
+// AI chat — loaded only on assistant page
+const ChatInterface = dynamic(
+  () => import('@/components/assistant/ChatInterface'),
+  { loading: () => <ChatSkeleton /> }
+)
+Section 11: Security
+11.1 Environment Variables
+Bash
+
+# .env.example — Commit this file
+# .env.local — Never commit this file
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key  # Server-only, never exposed to client
+
+# Mapbox
+NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_public_token  # Public token (read-only, safe to expose)
+MAPBOX_STYLE_ID=your_custom_style_id
+
+# AI (Groq)
+GROQ_API_KEY=your_groq_api_key  # Server-only
+
+# Rate limiting (Upstash Redis)
+UPSTASH_REDIS_REST_URL=your_upstash_url  # Server-only
+UPSTASH_REDIS_REST_TOKEN=your_upstash_token  # Server-only
+
+# ETL only (not needed in production web app)
+ETL_SUPABASE_URL=same_as_above
+ETL_SUPABASE_SERVICE_KEY=same_as_service_role_key
+
+# Analytics (optional)
+NEXT_PUBLIC_VERCEL_ANALYTICS_ID=auto_set_by_vercel
+11.2 Security Rules
+TypeScript
+
+// API security checklist — applied to every route
+
+// 1. Input validation with Zod (no raw string usage)
+// 2. Parameterized queries via Supabase client (no SQL injection possible)
+// 3. Rate limiting on AI endpoint (Upstash)
+// 4. CORS — Vercel handles this automatically
+// 5. Content Security Policy — configured in next.config.js
+// 6. No user authentication data stored (no user accounts in MVP)
+// 7. AI logs store only hashed queries, no PII
+// 8. Mapbox token restricted by URL in Mapbox dashboard
+// 9. Supabase RLS — all tables read-only for public
+// 10. Service role key never exposed to browser (server-only imports only)
+11.3 Rate Limiting Implementation
+TypeScript
+
+// src/lib/rate-limiter.ts
+
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
+// Initialize only on server
+export const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, '1 m'),  // 10 requests per minute
+  analytics: false,
+  prefix: 'vectorshift_ai',
+})
+
+// Different limits for different endpoints
+export const explorerRatelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(60, '1 m'),  // 60/min for data explorer
+  prefix: 'vectorshift_explorer',
+})
+Section 12: Deployment
+12.1 Vercel Configuration
+JSON
+
+// vercel.json
+
+{
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "functions": {
+    "src/app/api/assistant/route.ts": {
+      "maxDuration": 30
+    },
+    "src/app/api/map/route.ts": {
+      "maxDuration": 10
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        }
+      ]
+    }
+  ]
+}
+12.2 GitHub Actions CI/CD
+YAML
+
+# .github/workflows/deploy.yml
+
+name: Deploy VectorShift
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm run test -- --passWithNoTests
+  
+  deploy:
+    name: Deploy to Vercel
+    needs: quality
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+YAML
+
+# .github/workflows/etl-annual.yml
+# Run manually once per year to refresh data
+
+name: ETL Data Refresh
+
+on:
+  workflow_dispatch:    # Manual trigger only
+  schedule:
+    - cron: '0 0 1 1 *'  # January 1st each year
+
+jobs:
+  etl:
+    name: Run ETL Pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - run: pip install -r etl/requirements.txt
+      
+      - name: Run ETL Pipeline
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          cd etl
+          python main.py
+12.3 Domain and DNS
+text
+
+DNS Configuration (Cloudflare):
+─────────────────────────────────
+Type  Name           Value                   Proxy
+A     vectorshift    76.76.21.21 (Vercel)    ✓ (Cloudflare proxy ON)
+CNAME www            vectorshift.app          ✓
+Section 13: Testing Strategy
+13.1 Testing Pyramid
+text
+
+┌──────────────────┐
+│   E2E Tests      │  ← Playwright: 5-10 critical user flows
+│   (few, slow)    │
+├──────────────────┤
+│ Integration Tests│  ← API route testing with mock DB
+│   (moderate)     │
+├──────────────────┤
+│   Unit Tests     │  ← Pure functions: score calculator, formatters
+│   (many, fast)   │
+└──────────────────┘
+13.2 Unit Tests — Score Calculator
+TypeScript
+
+// tests/unit/score-calculator.test.ts
+
+import { describe, it, expect } from 'vitest'
+import { calculateSuitability } from '@/lib/scoring/calculator'
+
+describe('Dengue Suitability Calculator', () => {
+  
+  it('returns 0 when temperature is below minimum', () => {
+    const result = calculateSuitability({
+      temp_mean_annual: 10,  // Below 18°C minimum
+      temp_min_coldest: 5,
+      humidity_mean: 70,
+      monthly_precip: [80, 80, 80, 80, 0, 0, 0, 0, 0, 0, 0, 0],
+      altitude_median: 100
+    }, 'dengue')
+    
+    expect(result.suitability_score).toBe(0)
+    expect(result.temp_score).toBe(0)
+  })
+  
+  it('returns high score for optimal tropical conditions', () => {
+    const result = calculateSuitability({
+      temp_mean_annual: 28,   // Perfect dengue temperature
+      temp_min_coldest: 22,   // Warm year-round
+      humidity_mean: 80,
+      monthly_precip: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+      altitude_median: 50
+    }, 'dengue')
+    
+    expect(result.suitability_score).toBeGreaterThan(0.8)
+    expect(result.risk_level).toBe('critical')
+  })
+  
+  it('returns 0 winter_score when coldest month is below threshold', () => {
+    const result = calculateSuitability({
+      temp_mean_annual: 20,
+      temp_min_coldest: 5,  // Below 10°C winter minimum — vector cannot overwinter
+      humidity_mean: 70,
+      monthly_precip: [80, 80, 80, 80, 0, 0, 0, 0, 0, 0, 0, 0],
+      altitude_median: 100
+    }, 'dengue')
+    
+    expect(result.winter_score).toBe(0)
+  })
+  
+  it('classifies risk levels correctly', () => {
+    const scores = [0.1, 0.3, 0.5, 0.7, 0.9]
+    const expected = ['none', 'low', 'moderate', 'high', 'critical']
+    
+    // Test risk classification function directly
+    import { classifyRisk } from '@/lib/scoring/risk-levels'
+    scores.forEach((score, i) => {
+      expect(classifyRisk(score)).toBe(expected[i])
+    })
+  })
+})
+13.3 Critical E2E Tests
+TypeScript
+
+// tests/e2e/explorer.spec.ts
+
+import { test, expect } from '@playwright/test'
+
+test.describe('Explorer Page', () => {
+  
+  test('map loads with disease selector and time slider', async ({ page }) => {
+    await page.goto('/explorer')
+    
+    // Wait for map to be ready
+    await expect(page.locator('[data-testid="map-container"]')).toBeVisible()
+    await expect(page.locator('[data-testid="disease-selector"]')).toBeVisible()
+    await expect(page.locator('[data-testid="time-slider"]')).toBeVisible()
+    await expect(page.locator('[data-testid="year-display"]')).toContainText('2024')
+  })
+  
+  test('clicking dengue shows dengue data', async ({ page }) => {
+    await page.goto('/explorer')
+    await page.click('[data-testid="disease-dengue"]')
+    await expect(page.locator('[data-testid="active-disease"]')).toContainText('Dengue')
+  })
+  
+  test('clicking country opens country panel', async ({ page }) => {
+    await page.goto('/explorer')
+    // Wait for map load then click Egypt
+    await page.waitForSelector('[data-testid="map-ready"]')
+    await page.click('[data-testid="country-EGY"]')
+    await expect(page.locator('[data-testid="country-panel"]')).toBeVisible()
+    await expect(page.locator('[data-testid="country-name"]')).toContainText('Egypt')
+  })
+  
+  test('time slider changes year', async ({ page }) => {
+    await page.goto('/explorer')
+    // Use keyboard to move slider
+    await page.click('[data-testid="time-slider-input"]')
+    await page.keyboard.press('ArrowRight')
+    await expect(page.locator('[data-testid="year-display"]')).toContainText('2025')
+  })
+})
+
+test.describe('Country Profile Page', () => {
+  
+  test('loads Egypt profile with all sections', async ({ page }) => {
+    await page.goto('/country/egypt')
+    
+    await expect(page.locator('h1')).toContainText('Egypt')
+    await expect(page.locator('[data-testid="risk-score"]')).toBeVisible()
+    await expect(page.locator('[data-testid="disease-cards"]')).toBeVisible()
+    await expect(page.locator('[data-testid="historical-chart"]')).toBeVisible()
+  })
+  
+  test('has correct metadata', async ({ page }) => {
+    await page.goto('/country/italy')
+    await expect(page).toHaveTitle(/Italy.*VectorShift/)
+  })
+})
+Section 14: Monitoring and Logging
+14.1 Vercel Analytics
+TypeScript
+
+// src/app/layout.tsx — Already included in Analytics import
+
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+
+// Add to layout body:
+<Analytics />
+<SpeedInsights />
+14.2 Error Monitoring (Sentry — Free Tier)
+TypeScript
+
+// src/app/error.tsx — Global error boundary
+
+'use client'
+
+import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  useEffect(() => {
+    Sentry.captureException(error)
+  }, [error])
+
+  return (
+    <div className="min-h-screen flex items-center justify-center 
+                    bg-background-primary">
+      <div className="text-center max-w-md px-6">
+        <div className="text-text-tertiary text-sm font-mono mb-4">
+          ERROR
+        </div>
+        <h2 className="text-display-sm font-display font-bold 
+                       text-text-primary mb-3">
+          Something went wrong
+        </h2>
+        <p className="text-text-secondary text-md mb-6">
+          The application encountered an unexpected error. 
+          Our team has been notified.
+        </p>
+        <button
+          onClick={reset}
+          className="px-6 py-2.5 bg-accent-400 text-background-primary 
+                     font-semibold rounded-md hover:bg-accent-300 
+                     transition-colors duration-150"
+        >
+          Try again
+        </button>
+      </div>
+    </div>
+  )
+}
+14.3 API Health Check
+TypeScript
+
+// src/app/api/health/route.ts
+
+import { NextResponse } from 'next/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
+
+export async function GET() {
+  const start = Date.now()
+  
+  try {
+    const supabase = createServerSupabaseClient()
+    
+    // Simple query to verify DB connection
+    const { error } = await supabase
+      .from('data_freshness')
+      .select('source_name, last_updated, status')
+      .limit(5)
+    
+    if (error) throw error
+    
+    return NextResponse.json({
+      status: 'healthy',
+      database: 'connected',
+      response_ms: Date.now() - start,
+      timestamp: new Date().toISOString()
+    })
+    
+  } catch (error) {
+    return NextResponse.json({
+      status: 'degraded',
+      database: 'error',
+      error: 'Database connection failed',
+      timestamp: new Date().toISOString()
+    }, { status: 503 })
+  }
+}
+Section 15: Scalability Roadmap
+15.1 Free Tier Limits and Thresholds
+text
+
+VERCEL FREE TIER:
+  ✓ 100GB bandwidth/month
+  ✓ 100,000 serverless function invocations/day
+  ✓ Unlimited static pages
+  ⚠ Trigger upgrade at: 50,000 unique visitors/month
+
+SUPABASE FREE TIER:
+  ✓ 500MB database
+  ✓ 1GB file storage
+  ✓ 50,000 monthly active users
+  ✓ 2GB bandwidth
+  ⚠ Estimated usage: ~235MB DB → Safe until significant data expansion
+  ⚠ Trigger upgrade at: 30,000 monthly active users
+
+MAPBOX FREE TIER:
+  ✓ 50,000 map loads/month
+  ⚠ Trigger upgrade at: 40,000 monthly active users (assuming 1 load/visit)
+
+GROQ FREE TIER:
+  ✓ 14,400 requests/day
+  ✓ 500,000 tokens/day
+  ⚠ Trigger upgrade at: ~2,000 AI assistant queries/day
+15.2 Scaling Architecture (Post-MVP)
+When traffic requires scaling beyond free tiers:
+
+text
+
+Level 1 (1K-10K users/month):
+  → Stay on free tiers, optimize queries
+  → Add Cloudflare CDN caching for API responses
+  → Cost: $0
+
+Level 2 (10K-100K users/month):
+  → Upgrade Supabase to Pro ($25/month)
+  → Upgrade Vercel to Pro ($20/month)
+  → Cost: ~$45/month
+
+Level 3 (100K+ users/month):
+  → Supabase Pro with connection pooler
+  → Vercel Pro with higher function limits
+  → Add Redis caching layer (Upstash Pro)
+  → Cost: ~$100-200/month
+
+Level 4 (Enterprise):
+  → Dedicated database servers
+  → Multi-region deployment
+  → Enterprise partnerships with WHO, governments
+  → Cost: Self-sustaining from revenue
+Section 16: Package.json
+JSON
+
+{
+  "name": "vectorshift",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "format": "prettier --write .",
+    "analyze": "ANALYZE=true next build"
+  },
+  "dependencies": {
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "typescript": "5.5.3",
+    
+    "@supabase/supabase-js": "2.44.4",
+    "@supabase/ssr": "0.3.0",
+    
+    "mapbox-gl": "3.5.1",
+    "react-map-gl": "7.1.7",
+    
+    "recharts": "2.12.7",
+    "d3": "7.9.0",
+    "@types/d3": "7.4.3",
+    
+    "@tanstack/react-query": "5.51.11",
+    "@tanstack/react-table": "8.19.3",
+    
+    "zustand": "4.5.4",
+    "framer-motion": "11.3.19",
+    
+    "react-hook-form": "7.52.2",
+    "zod": "3.23.8",
+    "@hookform/resolvers": "3.9.0",
+    
+    "groq-sdk": "0.5.0",
+    "@upstash/ratelimit": "2.0.1",
+    "@upstash/redis": "1.31.5",
+    
+    "lucide-react": "0.408.0",
+    "clsx": "2.1.1",
+    "tailwind-merge": "2.4.0",
+    "class-variance-authority": "0.7.0",
+    "date-fns": "3.6.0",
+    
+    "@radix-ui/react-dialog": "1.1.1",
+    "@radix-ui/react-select": "2.1.1",
+    "@radix-ui/react-slider": "1.2.0",
+    "@radix-ui/react-tabs": "1.1.0",
+    "@radix-ui/react-tooltip": "1.1.2",
+    "@radix-ui/react-toast": "1.2.1",
+    
+    "next-themes": "0.3.0",
+    "@vercel/analytics": "1.3.1",
+    "@vercel/speed-insights": "1.0.12",
+    "@sentry/nextjs": "8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.12",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "@types/mapbox-gl": "3.4.0",
+    
+    "tailwindcss": "3.4.7",
+    "tailwindcss-animate": "1.0.7",
+    "autoprefixer": "10.4.19",
+    "postcss": "8.4.40",
+    
+    "eslint": "8.57.0",
+    "eslint-config-next": "14.2.5",
+    "prettier": "3.3.3",
+    "prettier-plugin-tailwindcss": "0.6.5",
+    
+    "vitest": "2.0.4",
+    "@vitejs/plugin-react": "4.3.1",
+    "@testing-library/react": "16.0.0",
+    "@testing-library/jest-dom": "6.4.6",
+    
+    "@playwright/test": "1.45.3",
+    
+    "@next/bundle-analyzer": "14.2.5"
+  }
+}
+Section 17: Implementation Sequence
+This is the exact order in which to build VectorShift. Do not skip steps.
+
+text
+
+WEEK 1-2: FOUNDATION
+─────────────────────
+□ Initialize Next.js project with TypeScript
+□ Configure Tailwind with VectorShift design tokens
+□ Install all dependencies (pin exact versions)
+□ Create Supabase project, enable PostGIS
+□ Run all database migrations (schema from PRD Section 10)
+□ Configure environment variables
+□ Set up GitHub repository and Vercel project
+□ Set up basic navigation and layout
+□ Implement dark/light mode
+
+WEEK 3-4: ETL PIPELINE
+─────────────────────────
+□ Set up Python ETL environment
+□ Write NASA POWER collector script
+□ Write WHO GHO data downloader
+□ Write World Bank collector
+□ Write CMIP6 projections collector
+□ Write climate data processor
+□ Implement score calculator (most important!)
+□ Write data validator
+□ Write database loader
+□ Run full ETL pipeline — populate database
+□ Verify data in Supabase dashboard
+
+WEEK 5-6: MAP CORE
+──────────────────────
+□ Create Mapbox custom dark style in Mapbox Studio
+□ Build GlobalMap component (Mapbox GL JS)
+□ Add country GeoJSON source and fill layer
+□ Implement data-driven color expression
+□ Add country hover interaction
+□ Add country click interaction
+□ Build CountryPanel component (slide-in)
+□ Build DiseaseSelector left panel
+□ Connect to /api/map endpoint
+
+WEEK 7: TIME SLIDER & SCENARIOS
+──────────────────────────────────
+□ Build custom TimeSlider component
+□ Implement play/pause animation
+□ Connect slider to map data updates
+□ Add ScenarioToggle component
+□ Test full historical sweep (1981-2023)
+□ Test future projections (2024-2050)
+□ Add "newly at risk" pulsing animation
+
+WEEK 8-9: COUNTRY PROFILES
+──────────────────────────────
+□ Build country profile page structure
+□ Build CountryHeader component
+□ Build DiseaseRiskCard ×6
+□ Build SuitabilityTrendChart (historical)
+□ Build ProjectionChart (future)
+□ Build ClimateDriversPanel
+□ Build HealthSystemPanel
+□ Build VulnerabilityPanel
+□ Build NeighborCountries
+□ Generate all 195 country pages statically
+
+WEEK 10: COMPARE & TRENDS
+────────────────────────────
+□ Build CountrySelector component (searchable)
+□ Build Compare page layout (two columns)
+□ Implement comparison API endpoint
+□ Build Global Trends page
+□ Add AtRiskAreaChart (area chart over time)
+□ Add RegionalBreakdown chart
+□ Add Fastest Growing list
+
+WEEK 11: DATA EXPLORER & AI
+──────────────────────────────
+□ Build Data Explorer with TanStack Table
+□ Implement all filter controls
+□ Add CSV download functionality
+□ Set up Groq API integration
+□ Write AI system prompt
+□ Write context builder
+□ Build ChatInterface component
+□ Add suggested questions
+□ Test AI responses for accuracy
+
+WEEK 12: LANDING PAGE & POLISH
+────────────────────────────────
+□ Build all landing page sections
+□ Add count-up animations for stats
+□ Add scroll-triggered animations
+□ Build Methodology page (static, written content)
+□ Build About page
+□ Polish: loading states, error states, empty states
+□ Responsive design: mobile, tablet
+□ Performance audit: Lighthouse score target > 85
+□ SEO: metadata for all pages
+□ Deploy to production on Vercel
+
+WEEK 13-14: TESTING & LAUNCH
+──────────────────────────────
+□ Write unit tests for score calculator
+□ Write API integration tests
+□ Write E2E tests for critical flows
+□ Fix all identified bugs
+□ Cross-browser testing (Chrome, Firefox, Safari)
+□ Mobile testing (iOS Safari, Android Chrome)
+□ Set up Sentry error monitoring
+□ Final performance optimizations
+□ Launch 🚀
